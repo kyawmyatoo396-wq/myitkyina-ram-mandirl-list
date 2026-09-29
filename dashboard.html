@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Myitkyina Ram Mandir List</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase App (Core) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 lg:p-8">
+
+    <div class="w-full max-w-5xl space-y-6">
+        
+        <!-- Sticky Top Bar (Profile & Hindu List Header combined container) -->
+        <div class="sticky-header space-y-4 pt-2">
+            <!-- Top Profile & Logout Bar -->
+            <div class="w-full glass-card rounded-2xl shadow-xl p-4 sm:p-6 flex items-center justify-between border border-white/20">
+                <div class="flex items-center space-x-3">
+                    <div id="userAvatar" class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-md">
+                        U
+                    </div>
+                    <div>
+                        <h3 id="userName" class="font-bold text-gray-800 text-base sm:text-lg">Loading...</h3>
+                        <p id="userEmail" class="text-xs sm:text-sm text-gray-500">Loading...</p>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="flex items-center space-x-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-xl transition shadow-sm text-sm border border-red-200">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Log Out</span>
+                </button>
+            </div>
+
+            <!-- Hindu List Header & Quarter Filter (Sticky Section) -->
+            <div class="glass-card rounded-2xl shadow-xl p-4 sm:p-6 border border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Hindu List</h2>
+                    <p class="text-xs text-gray-500">View household heads and click 'House Member' to see family members.</p>
+                </div>
+                <!-- Quarter Filter Dropdown -->
+                <div class="w-full sm:w-auto">
+                    <select id="quarterFilter" onchange="filterDataByQuarter()" class="w-full sm:w-48 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-gray-700">
+                        <option value="ALL">All Quarters</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Welcome Box -->
+        <div id="welcomeBox" class="glass-card rounded-2xl shadow-2xl overflow-hidden border border-white/20 p-6 text-center space-y-3 hidden transition-all duration-300">
+            <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto text-indigo-600 text-xl shadow-inner">
+                <i class="fa-solid fa-house"></i>
+            </div>
+            <h2 id="welcomeTitle" class="text-xl font-bold text-gray-800">Welcome Back!</h2>
+            <p class="text-gray-600 text-xs sm:text-sm">You are successfully logged in to the Myitkyina Ram Mandir List system.</p>
+        </div>
+
+        <!-- Data Display Section (Table Container) -->
+        <div class="glass-card rounded-2xl shadow-2xl overflow-hidden border border-white/20 p-6 space-y-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse" id="mainTable">
+                    <tbody id="householdTableBody" class="divide-y divide-gray-200 text-sm text-gray-700">
+                        <tr>
+                            <td colspan="5" class="text-center py-6 text-gray-400">Loading data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- House Members Modal -->
+    <div id="membersModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                <div>
+                    <h3 id="modalHouseTitle" class="text-lg font-bold text-gray-800">House Members</h3>
+                    <p id="modalHouseSub" class="text-xs text-gray-500">List of members in this household</p>
+                </div>
+                <button onclick="closeMembersModal()" class="text-gray-400 hover:text-gray-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="max-h-60 overflow-y-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-600 text-xs uppercase border-b border-gray-200">
+                            <th class="py-2 px-3">စဉ်</th>
+                            <th class="py-2 px-3">အမည်</th>
+                            <th class="py-2 px-3">ဖုန်း</th>
+                            <th class="py-2 px-3">အိမ်ထောင်ဦးစီး ဟုတ်/မဟုတ်</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalMembersBody" class="divide-y divide-gray-100 text-gray-700">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="pt-2 text-right">
+                <button onclick="closeMembersModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="w-full text-center text-white/80 text-xs sm:text-sm py-4 mt-6">
+        &copy; 2026 Myitkyina Ram Mandir List. All rights reserved.
+    </footer>
+
+    <!-- Firebase Configuration & Script -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxuC_IFz_Y4P6WjXc4JaYLW498EviUoxE",
+            authDomain: "myitkyina-ram-mandirl-list.firebaseapp.com",
+            projectId: "myitkyina-ram-mandirl-list",
+            storageBucket: "myitkyina-ram-mandirl-list.firebasestorage.app",
+            messagingSenderId: "901724346578",
+            appId: "1:901724346578:web:ecc9c704ef24af6f33750b",
+            measurementId: "G-6GRZ6Q1M7K"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let allUsersData = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const welcomeBox = document.getElementById('welcomeBox');
+
+            if (sessionStorage.getItem('showWelcome') === 'true') {
+                if (welcomeBox) {
+                    welcomeBox.classList.remove('hidden');
+                    setTimeout(() => {
+                        welcomeBox.classList.add('hidden');
+                    }, 5000);
+                }
+            } else {
+                if (welcomeBox) {
+                    welcomeBox.classList.add('hidden');
+                }
+            }
+
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        const docRef = await db.collection("users").doc(user.uid).get();
+                        if (docRef.exists) {
+                            const data = docRef.data();
+                            const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim() || user.displayName || "User";
+                            
+                            document.getElementById('userName').textContent = fullName;
+                            document.getElementById('userEmail').textContent = data.email || user.email;
+                            document.getElementById('userAvatar').textContent = (fullName.charAt(0) || "U").toUpperCase();
+
+                            const welcomeTitle = document.getElementById('welcomeTitle');
+                            if (welcomeTitle) {
+                                welcomeTitle.textContent = `Welcome Back, ${data.firstName || 'User'}!`;
+                            }
+                        } else {
+                            document.getElementById('userName').textContent = user.displayName || "User";
+                            document.getElementById('userEmail').textContent = user.email;
+                            if (user.displayName) {
+                                document.getElementById('userAvatar').textContent = user.displayName.charAt(0).toUpperCase();
+                            }
+                        }
+
+                        await loadQuartersFilter();
+                        await loadAllUsersData();
+
+                    } catch (error) {
+                        console.error("Error fetching user data:", error);
+                    }
+                } else {
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+
+        async function loadQuartersFilter() {
+            try {
+                const snapshot = await db.collection('quarters').get();
+                const quarterFilter = document.getElementById('quarterFilter');
+                
+                quarterFilter.innerHTML = '<option value="ALL">All Quarters</option>';
+
+                snapshot.forEach(doc => {
+                    const qName = doc.id;
+                    const opt = document.createElement('option');
+                    opt.value = qName;
+                    opt.textContent = qName;
+                    quarterFilter.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Error loading quarters filter:", error);
+            }
+        }
+
+        async function loadAllUsersData() {
+            try {
+                const snapshot = await db.collection("users").get();
+                allUsersData = [];
+
+                snapshot.forEach(doc => {
+                    allUsersData.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderHouseholdTable(allUsersData);
+            } catch (error) {
+                console.error("Error loading users data:", error);
+                document.getElementById('householdTableBody').innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-500">Failed to load data.</td></tr>`;
+            }
+        }
+
+        function renderHouseholdTable(usersList) {
+            const tbody = document.getElementById('householdTableBody');
+            tbody.innerHTML = '';
+
+            const householdHeads = usersList.filter(item => item.isHeadOfHousehold === 'Yes');
+
+            if (householdHeads.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-400">No household heads found.</td></tr>`;
+                return;
+            }
+
+            // Group by Quarter
+            const groupedByQuarter = {};
+            householdHeads.forEach(item => {
+                const qtr = (item.quarter || 'OTHER').trim().toUpperCase();
+                if (!groupedByQuarter[qtr]) {
+                    groupedByQuarter[qtr] = [];
+                }
+                groupedByQuarter[qtr].push(item);
+            });
+
+            let globalIndex = 1;
+
+            // Loop through each quarter group
+            Object.keys(groupedByQuarter).sort().forEach(quarterName => {
+                // 1. Quarter Header Row (Larger & Bold)
+                const quarterTr = document.createElement('tr');
+                quarterTr.className = "bg-indigo-200/90 text-indigo-950 font-extrabold";
+                quarterTr.innerHTML = `
+                    <td colspan="5" class="py-4 px-4 text-base tracking-wide uppercase">
+                        <i class="fa-solid fa-location-dot mr-2 text-indigo-700"></i> ${quarterName} QUARTER
+                    </td>
+                `;
+                tbody.appendChild(quarterTr);
+
+                // 2. Table Column Headers Row (No., Name, Phone, Address, House Member)
+                const tableHeaderTr = document.createElement('tr');
+                tableHeaderTr.className = "bg-indigo-50 text-indigo-700 text-xs uppercase font-semibold border-b border-gray-200";
+                tableHeaderTr.innerHTML = `
+                    <th class="py-3 px-4">No.</th>
+                    <th class="py-3 px-4">Name</th>
+                    <th class="py-3 px-4">Phone</th>
+                    <th class="py-3 px-4">Address</th>
+                    <th class="py-3 px-4 text-center">House Member</th>
+                `;
+                tbody.appendChild(tableHeaderTr);
+
+                // 3. Members under this quarter
+                groupedByQuarter[quarterName].forEach((item) => {
+                    const fullName = `${item.firstName || ''} ${item.lastName || ''}`.trim();
+                    
+                    let hNum = item.houseNumber ? `${item.houseNumber}` : '';
+                    let qtrText = item.quarter ? `${item.quarter}, QUARTER` : '';
+                    let cty = item.city ? item.city : 'MYITKYINA';
+                    
+                    let fullAddress = [hNum, qtrText, cty].filter(Boolean).join(', ').toUpperCase();
+
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50/50 transition border-b border-gray-100";
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 font-medium text-gray-500">${globalIndex++}</td>
+                        <td class="py-3 px-4 font-semibold text-gray-800">${fullName}</td>
+                        <td class="py-3 px-4">${item.phone || '-'}</td>
+                        <td class="py-3 px-4 text-gray-600 font-medium">${fullAddress || '-'}</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="showHouseMembers('${item.houseNumber || ''}', '${item.quarter || ''}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition shadow-sm">
+                                <i class="fa-solid fa-users mr-1"></i> View Members
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        function filterDataByQuarter() {
+            const selectedQuarter = document.getElementById('quarterFilter').value;
+            
+            if (selectedQuarter === 'ALL') {
+                renderHouseholdTable(allUsersData);
+            } else {
+                const filtered = allUsersData.filter(item => (item.quarter || '').trim().toUpperCase() === selectedQuarter.trim().toUpperCase());
+                renderHouseholdTable(filtered);
+            }
+        }
+
+        function showHouseMembers(houseNumber, quarter) {
+            const modalTitle = document.getElementById('modalHouseTitle');
+            const modalSub = document.getElementById('modalHouseSub');
+            const modalBody = document.getElementById('modalMembersBody');
+
+            modalTitle.textContent = `House No: ${houseNumber || '-'}`;
+            modalSub.textContent = `Quarter: ${quarter || '-'}`;
+            modalBody.innerHTML = '';
+
+            const members = allUsersData.filter(item => 
+                (item.houseNumber || '').trim().toUpperCase() === (houseNumber || '').trim().toUpperCase() && 
+                (item.quarter || '').trim().toUpperCase() === (quarter || '').trim().toUpperCase()
+            );
+
+            if (members.length === 0) {
+                modalBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-400">No members found.</td></tr>`;
+            } else {
+                members.forEach((member, idx) => {
+                    const mName = `${member.firstName || ''} ${member.lastName || ''}`.trim();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-2 px-3 text-gray-500">${idx + 1}</td>
+                        <td class="py-2 px-3 font-medium text-gray-800">${mName}</td>
+                        <td class="py-2 px-3 text-gray-600">${member.phone || '-'}</td>
+                        <td class="py-2 px-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${member.isHeadOfHousehold === 'Yes' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">${member.isHeadOfHousehold || 'No'}</span></td>
+                    `;
+                    modalBody.appendChild(tr);
+                });
+            }
+
+            document.getElementById('membersModal').classList.remove('hidden');
+        }
+
+        function closeMembersModal() {
+            document.getElementById('membersModal').classList.add('hidden');
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('showWelcome');
+            auth.signOut().then(() => {
+                window.location.href = 'index.html';
+            }).catch((error) => {
+                console.error('Logout Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
