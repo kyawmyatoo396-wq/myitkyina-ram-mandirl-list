@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuthPortal - Login & Signup</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase App (Core) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <!-- Firebase Auth -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+
+    <div class="w-full max-w-md glass-card rounded-2xl shadow-2xl overflow-hidden border border-white/20 transition-all duration-300">
+        
+        <!-- Header Tabs -->
+        <div id="authTabs" class="flex border-b border-gray-200">
+            <button id="loginTabBtn" onclick="switchTab('login')" class="flex-1 py-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-colors duration-200">
+                Login
+            </button>
+            <button id="signupTabBtn" onclick="switchTab('signup')" class="flex-1 py-4 text-center font-semibold text-gray-400 hover:text-gray-600 border-b-2 border-transparent transition-colors duration-200">
+                Sign Up
+            </button>
+        </div>
+
+        <div class="p-6 sm:p-8 max-h-[80vh] overflow-y-auto">
+            
+            <!-- Toast Notification Container -->
+            <div id="toast" class="hidden mb-4 p-3 rounded-lg text-sm text-center font-medium transition-all duration-300"></div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)" novalidate class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fa-regular fa-envelope"></i>
+                        </span>
+                        <input type="text" id="loginEmail" placeholder="example@gmail.com" 
+                            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="loginPassword" placeholder="••••••••" 
+                            class="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                        <button type="button" onclick="togglePassword('loginPassword', 'loginEye')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <i id="loginEye" class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        <span class="ml-2 text-gray-600">Remember me</span>
+                    </label>
+                    <a href="#" class="text-indigo-600 hover:underline font-medium">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition duration-200 text-sm">
+                    Login
+                </button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signupForm" onsubmit="handleSignup(event)" novalidate class="space-y-4 hidden">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <input type="text" id="signupFirstName" placeholder="Rahul" 
+                            class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <input type="text" id="signupLastName" placeholder="Kumar" 
+                            class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input type="text" id="signupEmail" placeholder="example@gmail.com" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Re-enter Password</label>
+                    <input type="password" id="signupRePassword" placeholder="••••••••" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <input type="text" id="signupPhone" placeholder="09123456789" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+
+                <!-- Nationality Checkboxes -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                    <div class="flex items-center space-x-6 pt-1">
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="signupNationality" value="Hindi" checked class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Hindi</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="signupNationality" value="Nepali" class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Nepali</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Head of Household -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">အိမ်ထောင်ဦးစီး ဟုတ်ပါသလား။</label>
+                    <div class="flex items-center space-x-6 pt-1">
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="signupIsHead" value="Yes" class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Yes</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="signupIsHead" value="No" checked class="text-indigo-600 focus:ring-indigo-500">
+                            <span>No</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Single Address Box -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <input type="text" id="signupAddress" placeholder="No.57,Min Yart Quarter,Myitkyina City,Kachin State,Myanmar" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">အိမ်နံပါတ်</label>
+                        <input type="text" id="signupHouse" placeholder="No.57" 
+                            class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quarter</label>
+                        <select id="signupQuarter" onchange="checkQuarterSelection('signup')" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-gray-500">
+                            <option value="" disabled selected hidden>Select Quarter</option>
+                            <option value="မင်းရပ်" class="text-gray-700">မင်းရပ်</option>
+                            <option value="မြို့မ" class="text-gray-700">မြို့မ</option>
+                            <option value="မြို့သစ်" class="text-gray-700">မြို့သစ်</option>
+                            <option value="ယုဇန" class="text-gray-700">ယုဇန</option>
+                            <option value="မြေမြင့်" class="text-gray-700">မြေမြင့်</option>
+                            <option value="ခေမာသီရိ" class="text-gray-700">ခေမာသီရိ</option>
+                            <option value="ရမ်ပူ" class="text-gray-700">ရမ်ပူ</option>
+                            <option value="ရွှေညောင်ပင်" class="text-gray-700">ရွှေညောင်ပင်</option>
+                            <option value="လယ်ကုန်း" class="text-gray-700">လယ်ကုန်း</option>
+                            <option value="အေးစေတီ" class="text-gray-700">အေးစေတီ</option>
+                            <option value="ရှမ်းစုတောင်" class="text-gray-700">ရှမ်းစုတောင်</option>
+                            <option value="ရှမ်းစုမြောက်" class="text-gray-700">ရှမ်းစုမြောက်</option>
+                            <option value="အောင်နန်း" class="text-gray-700">အောင်နန်း</option>
+                            <option value="သီတာ" class="text-gray-700">သီတာ</option>
+                            <option value="ကချင်စု" class="text-gray-700">ကချင်စု</option>
+                            <option value="ကျွန်းပင်သာ" class="text-gray-700">ကျွန်းပင်သာ</option>
+                            <option value="ဧရာ" class="text-gray-700">ဧရာ</option>
+                            <option value="ရန်ကြီးအောင်" class="text-gray-700">ရန်ကြီးအောင်</option>
+                            <option value="တပ်ကုန်း" class="text-gray-700">တပ်ကုန်း</option>
+                            <option value="မြို့သစ်ကြီး" class="text-gray-700">မြို့သစ်ကြီး</option>
+                            <option value="add_new" class="text-indigo-600 font-semibold">+ Add Quarter</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition duration-200 text-sm">
+                    Create Account
+                </button>
+            </form>
+
+            <!-- Google Additional Info Form -->
+            <form id="googleCompleteForm" onsubmit="handleGoogleComplete(event)" novalidate class="space-y-4 hidden">
+                <div class="bg-indigo-50 border border-indigo-200 p-3 rounded-lg text-xs text-indigo-700 mb-2">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Please complete your profile information to proceed.
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <input type="text" id="googleFirstName" placeholder="Rahul" 
+                            class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <input type="text" id="googleLastName" placeholder="Kumar" 
+                            class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <input type="text" id="googlePhone" placeholder="09123456789" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+
+                <!-- Nationality Checkboxes -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                    <div class="flex items-center space-x-6 pt-1">
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="googleNationality" value="Hindi" checked class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Hindi</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="googleNationality" value="Nepali" class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Nepali</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Head of Household -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">အိမ်ထောင်ဦးစီး ဟုတ်ပါသလား။</label>
+                    <div class="flex items-center space-x-6 pt-1">
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="googleIsHead" value="Yes" class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Yes</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="googleIsHead" value="No" checked class="text-indigo-600 focus:ring-indigo-500">
+                            <span>No</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Single Address Box -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <input type="text" id="googleAddress" placeholder="No.57,Min Yart Quarter,Myitkyina City,Kachin State,Myanmar" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">အိမ်နံပါတ်</label>
+                        <input type="text" id="googleHouse" placeholder="No.57" 
+                            class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quarter</label>
+                        <select id="googleQuarter" onchange="checkQuarterSelection('google')" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-gray-500">
+                            <option value="" disabled selected hidden>Select Quarter</option>
+                            <option value="မင်းရပ်" class="text-gray-700">မင်းရပ်</option>
+                            <option value="မြို့မ" class="text-gray-700">မြို့မ</option>
+                            <option value="မြို့သစ်" class="text-gray-700">မြို့သစ်</option>
+                            <option value="ယုဇန" class="text-gray-700">ယုဇန</option>
+                            <option value="မြေမြင့်" class="text-gray-700">မြေမြင့်</option>
+                            <option value="ခေမာသီရိ" class="text-gray-700">ခေမာသီရိ</option>
+                            <option value="ရမ်ပူ" class="text-gray-700">ရမ်ပူ</option>
+                            <option value="ရွှေညောင်ပင်" class="text-gray-700">ရွှေညောင်ပင်</option>
+                            <option value="လယ်ကုန်း" class="text-gray-700">လယ်ကုန်း</option>
+                            <option value="အေးစေတီ" class="text-gray-700">အေးစေတီ</option>
+                            <option value="ရှမ်းစုတောင်" class="text-gray-700">ရှမ်းစုတောင်</option>
+                            <option value="ရှမ်းစုမြောက်" class="text-gray-700">ရှမ်းစုမြောက်</option>
+                            <option value="အောင်နန်း" class="text-gray-700">အောင်နန်း</option>
+                            <option value="သီတာ" class="text-gray-700">သီတာ</option>
+                            <option value="ကချင်စု" class="text-gray-700">ကချင်စု</option>
+                            <option value="ကျွန်းပင်သာ" class="text-gray-700">ကျွန်းပင်သာ</option>
+                            <option value="ဧရာ" class="text-gray-700">ဧရာ</option>
+                            <option value="ရန်ကြီးအောင်" class="text-gray-700">ရန်ကြီးအောင်</option>
+                            <option value="တပ်ကုန်း" class="text-gray-700">တပ်ကုန်း</option>
+                            <option value="မြို့သစ်ကြီး" class="text-gray-700">မြို့သစ်ကြီး</option>
+                            <option value="add_new" class="text-indigo-600 font-semibold">+ Add Quarter</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition duration-200 text-sm">
+                    Complete Profile
+                </button>
+            </form>
+
+            <!-- Social Logins Divider -->
+            <div id="socialDivider" class="mt-6 relative flex py-2 items-center">
+                <div class="flex-grow border-t border-gray-200"></div>
+                <span class="flex-shrink mx-4 text-gray-400 text-xs uppercase">Or continue with</span>
+                <div class="flex-grow border-t border-gray-200"></div>
+            </div>
+
+            <!-- Google Login Button -->
+            <div id="socialContainer" class="mt-4">
+                <button onclick="handleGoogleLogin()" class="w-full flex items-center justify-center py-2.5 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700 shadow-sm">
+                    <i class="fa-brands fa-google text-red-500 mr-2"></i> Continue with Google
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Custom Modal for Adding Quarter -->
+    <div id="customQuarterModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-800">ရပ်ကွက်အသစ် ထည့်ရန်</h3>
+                <button onclick="closeQuarterModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500">စာရင်းထဲတွင် မပါဝင်သေးသော ရပ်ကွက်အသစ်အမည်ကို ရိုက်ထည့်ပါ။</p>
+            <div>
+                <input type="text" id="modalQuarterInput" placeholder="ဥပမာ - ရပ်ကွက်အသစ်" 
+                    class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeQuarterModal()" class="flex-1 py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition">
+                    မလုပ်တော့ပါ
+                </button>
+                <button onclick="saveNewQuarter()" class="flex-1 py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition">
+                    သိမ်းဆည်းမည်
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic & Firebase Integration -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAxuC_IFz_Y4P6WjXc4JaYLW498EviUoxE",
+            authDomain: "myitkyina-ram-mandirl-list.firebaseapp.com",
+            projectId: "myitkyina-ram-mandirl-list",
+            storageBucket: "myitkyina-ram-mandirl-list.firebasestorage.app",
+            messagingSenderId: "901724346578",
+            appId: "1:901724346578:web:ecc9c704ef24af6f33750b",
+            measurementId: "G-6GRZ6Q1M7K"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let activeFormType = '';
+
+        function switchTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            const googleCompleteForm = document.getElementById('googleCompleteForm');
+            const loginTabBtn = document.getElementById('loginTabBtn');
+            const signupTabBtn = document.getElementById('signupTabBtn');
+            const authTabs = document.getElementById('authTabs');
+            const socialDivider = document.getElementById('socialDivider');
+            const socialContainer = document.getElementById('socialContainer');
+
+            googleCompleteForm.classList.add('hidden');
+            authTabs.classList.remove('hidden');
+            socialDivider.classList.remove('hidden');
+            socialContainer.classList.remove('hidden');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                signupForm.classList.add('hidden');
+                loginTabBtn.className = "flex-1 py-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-colors duration-200";
+                signupTabBtn.className = "flex-1 py-4 text-center font-semibold text-gray-400 hover:text-gray-600 border-b-2 border-transparent transition-colors duration-200";
+            } else {
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+                signupTabBtn.className = "flex-1 py-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-colors duration-200";
+                loginTabBtn.className = "flex-1 py-4 text-center font-semibold text-gray-400 hover:text-gray-600 border-b-2 border-transparent transition-colors duration-200";
+            }
+            hideToast();
+        }
+
+        function togglePassword(fieldId, iconId) {
+            const passwordField = document.getElementById(fieldId);
+            const eyeIcon = document.getElementById(iconId);
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                eyeIcon.className = "fa-regular fa-eye-slash";
+            } else {
+                passwordField.type = 'password';
+                eyeIcon.className = "fa-regular fa-eye";
+            }
+        }
+
+        function checkQuarterSelection(formType) {
+            activeFormType = formType;
+            const selectElem = document.getElementById(formType + 'Quarter');
+            
+            if (selectElem.value) {
+                selectElem.classList.remove('text-gray-500');
+                selectElem.classList.add('text-gray-700');
+            }
+
+            if (selectElem.value === 'add_new') {
+                document.getElementById('modalQuarterInput').value = '';
+                document.getElementById('customQuarterModal').classList.remove('hidden');
+                document.getElementById('modalQuarterInput').focus();
+            }
+        }
+
+        function closeQuarterModal() {
+            document.getElementById('customQuarterModal').classList.add('hidden');
+            if (activeFormType) {
+                document.getElementById(activeFormType + 'Quarter').value = "";
+            }
+        }
+
+        function saveNewQuarter() {
+            const inputVal = document.getElementById('modalQuarterInput').value.trim();
+            if (!inputVal) {
+                alert('ကျေးဇူးပြု၍ ရပ်ကွက်အမည် ထည့်ပါ။');
+                return;
+            }
+
+            const selectElem = document.getElementById(activeFormType + 'Quarter');
+            
+            let exists = false;
+            for (let i = 0; i < selectElem.options.length; i++) {
+                if (selectElem.options[i].value === inputVal) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists) {
+                const opt = document.createElement('option');
+                opt.value = inputVal;
+                opt.textContent = inputVal;
+                opt.className = "text-gray-700";
+                
+                const addNewOption = selectElem.querySelector('option[value="add_new"]');
+                selectElem.insertBefore(opt, addNewOption);
+            }
+
+            selectElem.value = inputVal;
+            selectElem.classList.remove('text-gray-500');
+            selectElem.classList.add('text-gray-700');
+            document.getElementById('customQuarterModal').classList.add('hidden');
+        }
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `mb-4 p-3 rounded-lg text-sm text-center font-medium transition-all duration-300 ${isSuccess ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`;
+            toast.classList.remove('hidden');
+        }
+
+        function hideToast() {
+            document.getElementById('toast').classList.add('hidden');
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showToast('Please fill in all required fields.', false);
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    showToast(`Success! Logged in as (${email}).`, true);
+                })
+                .catch((error) => {
+                    showToast(error.message, false);
+                });
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            const firstName = document.getElementById('signupFirstName').value.trim();
+            const lastName = document.getElementById('signupLastName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const rePassword = document.getElementById('signupRePassword').value;
+            const phone = document.getElementById('signupPhone').value.trim();
+            
+            const nationalityRadio = document.querySelector('input[name="signupNationality"]:checked');
+            const nationality = nationalityRadio ? nationalityRadio.value : '';
+
+            const isHeadRadio = document.querySelector('input[name="signupIsHead"]:checked');
+            const isHead = isHeadRadio ? isHeadRadio.value : '';
+
+            const address = document.getElementById('signupAddress').value.trim();
+            const house = document.getElementById('signupHouse').value.trim();
+            const quarter = document.getElementById('signupQuarter').value;
+
+            if (!firstName || !lastName || !email || !password || !rePassword || !phone || !nationality || !isHead || !address || !house || !quarter) {
+                showToast('Please fill in all required fields.', false);
+                return;
+            }
+
+            if (!email.includes('@') || !email.includes('.')) {
+                showToast('Please enter a valid email address.', false);
+                return;
+            }
+
+            if (password !== rePassword) {
+                showToast('Passwords do not match. Please check again.', false);
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+
+                    return db.collection("users").doc(user.uid).set({
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        phone: phone,
+                        nationality: nationality,
+                        isHeadOfHousehold: isHead,
+                        address: address,
+                        houseNumber: house,
+                        quarter: quarter,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    showToast(`Welcome ${firstName}, your account has been created successfully.`, true);
+                })
+                .catch((error) => {
+                    showToast(error.message, false);
+                });
+        }
+
+        function handleGoogleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    document.getElementById('authTabs').classList.add('hidden');
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('signupForm').classList.add('hidden');
+                    document.getElementById('socialDivider').classList.add('hidden');
+                    document.getElementById('socialContainer').classList.add('hidden');
+
+                    document.getElementById('googleCompleteForm').classList.remove('hidden');
+                    showToast('Google authentication successful! Please complete your profile.', true);
+                })
+                .catch((error) => {
+                    showToast(error.message, false);
+                });
+        }
+
+        function handleGoogleComplete(event) {
+            event.preventDefault();
+            const firstName = document.getElementById('googleFirstName').value.trim();
+            const lastName = document.getElementById('googleLastName').value.trim();
+            const phone = document.getElementById('googlePhone').value.trim();
+            
+            const nationalityRadio = document.querySelector('input[name="googleNationality"]:checked');
+            const nationality = nationalityRadio ? nationalityRadio.value : '';
+
+            const isHeadRadio = document.querySelector('input[name="googleIsHead"]:checked');
+            const isHead = isHeadRadio ? isHeadRadio.value : '';
+
+            const address = document.getElementById('googleAddress').value.trim();
+            const house = document.getElementById('googleHouse').value.trim();
+            const quarter = document.getElementById('googleQuarter').value;
+
+            if (!firstName || !phone || !nationality || !isHead || !address || !house || !quarter) {
+                showToast('Please fill in all required fields.', false);
+                return;
+            }
+
+            const user = auth.currentUser;
+            if (user) {
+                db.collection("users").doc(user.uid).set({
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: user.email,
+                    phone: phone,
+                    nationality: nationality,
+                    isHeadOfHousehold: isHead,
+                    address: address,
+                    houseNumber: house,
+                    quarter: quarter,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    showToast(`Profile completed successfully! Welcome, ${firstName}.`, true);
+                })
+                .catch((error) => {
+                    showToast(error.message, false);
+                });
+            } else {
+                showToast('No authenticated user found. Please login again.', false);
+            }
+        }
+    </script>
+</body>
+</html>
