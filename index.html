@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hindu List - Login Form</title>
+    <title>Myitkyina-Hindu-List</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -398,7 +398,6 @@
                         items = items.filter(item => !item.match(/[\u1000-\u109F]/));
                         items = [...new Set(items)];
                         
-                        // MIN YAT ကို ဖယ်ထုတ်ပြီး ထိပ်ဆုံးမှာ အမြဲတမ်းထားမည်
                         items = items.filter(item => item !== "MIN YAT");
                         items.unshift("MIN YAT");
 
@@ -406,11 +405,9 @@
                         items = items.map(item => item.toUpperCase().trim());
                         items = [...new Set(items)];
 
-                        // MYITKYINA ကို ဖယ်ထုတ်ပြီး ထိပ်ဆုံးမှာ အမြဲတမ်းထားမည်
                         items = items.filter(item => item !== "MYITKYINA");
                         items.unshift("MYITKYINA");
 
-                        // Firestore ထဲမှာ မရှိသေးရင် အလိုအလျောက် သွားထည့်ပေးမည်
                         const myitkyinaCheck = await db.collection('cities').doc("MYITKYINA").get();
                         if (!myitkyinaCheck.exists) {
                             await db.collection('cities').doc("MYITKYINA").set({ name: "MYITKYINA" });
@@ -597,7 +594,10 @@
 
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    showToast(`Success! Logged in as (${email}).`, true);
+                    showToast(`Success! Logged in as (${email}). Redirecting...`, true);
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
                 })
                 .catch((error) => {
                     showToast(error.message, false);
@@ -656,7 +656,10 @@
                     });
                 })
                 .then(() => {
-                    showToast(`Welcome ${firstName}, your account has been created successfully.`, true);
+                    showToast(`Welcome ${firstName}, account created! Redirecting...`, true);
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
                 })
                 .catch((error) => {
                     showToast(error.message, false);
@@ -666,15 +669,25 @@
         function handleGoogleLogin() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
-                .then((result) => {
-                    document.getElementById('authTabs').classList.add('hidden');
-                    document.getElementById('loginForm').classList.add('hidden');
-                    document.getElementById('signupForm').classList.add('hidden');
-                    document.getElementById('socialDivider').classList.add('hidden');
-                    document.getElementById('socialContainer').classList.add('hidden');
+                .then(async (result) => {
+                    const user = result.user;
+                    
+                    const userDoc = await db.collection("users").doc(user.uid).get();
+                    if (userDoc.exists) {
+                        showToast('Google Sign-In successful! Redirecting...', true);
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 1000);
+                    } else {
+                        document.getElementById('authTabs').classList.add('hidden');
+                        document.getElementById('loginForm').classList.add('hidden');
+                        document.getElementById('signupForm').classList.add('hidden');
+                        document.getElementById('socialDivider').classList.add('hidden');
+                        document.getElementById('socialContainer').classList.add('hidden');
 
-                    document.getElementById('googleCompleteForm').classList.remove('hidden');
-                    showToast('Google authentication successful! Please complete your profile.', true);
+                        document.getElementById('googleCompleteForm').classList.remove('hidden');
+                        showToast('Google authentication successful! Please complete your profile.', true);
+                    }
                 })
                 .catch((error) => {
                     showToast(error.message, false);
@@ -717,7 +730,10 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 })
                 .then(() => {
-                    showToast(`Profile completed successfully! Welcome, ${firstName}.`, true);
+                    showToast(`Profile completed successfully! Redirecting...`, true);
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
                 })
                 .catch((error) => {
                     showToast(error.message, false);
