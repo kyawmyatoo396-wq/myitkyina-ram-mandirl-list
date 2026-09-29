@@ -27,6 +27,9 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
         }
+        .uppercase-input {
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
@@ -43,7 +46,8 @@
             </button>
         </div>
 
-        <div class="p-6 sm:p-8 max-h-[80vh] overflow-y-auto">
+        <!-- Scrollable Form Container with ID -->
+        <div id="scrollContainer" class="p-6 sm:p-8 max-h-[80vh] overflow-y-auto">
             
             <!-- Toast Notification Container -->
             <div id="toast" class="hidden mb-4 p-3 rounded-lg text-sm text-center font-medium transition-all duration-300"></div>
@@ -109,16 +113,28 @@
                         class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                 </div>
 
+                <!-- Password with Eye Icon -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="signupPassword" placeholder="••••••••" 
-                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    <div class="relative">
+                        <input type="password" id="signupPassword" placeholder="••••••••" 
+                            class="w-full pl-3 pr-10 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <button type="button" onclick="togglePassword('signupPassword', 'signupEye')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <i id="signupEye" class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
+                <!-- Re-enter Password with Eye Icon -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Re-enter Password</label>
-                    <input type="password" id="signupRePassword" placeholder="••••••••" 
-                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                    <div class="relative">
+                        <input type="password" id="signupRePassword" placeholder="••••••••" 
+                            class="w-full pl-3 pr-10 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <button type="button" onclick="togglePassword('signupRePassword', 'signupReEye')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                            <i id="signupReEye" class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div>
@@ -144,7 +160,7 @@
 
                 <!-- Head of Household -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">အိမ်ထောင်ဦးစီး ဟုတ်ပါသလား။</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Is Head of Household? အိမ်ထောင်ဦးစီး ဟုတ်ပါသလား။</label>
                     <div class="flex items-center space-x-6 pt-1">
                         <label class="flex items-center space-x-2 cursor-pointer text-sm">
                             <input type="radio" name="signupIsHead" value="Yes" class="text-indigo-600 focus:ring-indigo-500">
@@ -157,46 +173,26 @@
                     </div>
                 </div>
 
-                <!-- Single Address Box -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                    <input type="text" id="signupAddress" placeholder="No.57,Min Yart Quarter,Myitkyina City,Kachin State,Myanmar" 
-                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">အိမ်နံပါတ်</label>
-                        <input type="text" id="signupHouse" placeholder="No.57" 
-                            class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">House Number</label>
+                        <input type="text" id="signupHouse" placeholder="NO. 57" 
+                            class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm uppercase-input">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Quarter</label>
-                        <select id="signupQuarter" onchange="checkQuarterSelection('signup')" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-gray-500">
-                            <option value="" disabled selected hidden>Select Quarter</option>
-                            <option value="မင်းရပ်" class="text-gray-700">မင်းရပ်</option>
-                            <option value="မြို့မ" class="text-gray-700">မြို့မ</option>
-                            <option value="မြို့သစ်" class="text-gray-700">မြို့သစ်</option>
-                            <option value="ယုဇန" class="text-gray-700">ယုဇန</option>
-                            <option value="မြေမြင့်" class="text-gray-700">မြေမြင့်</option>
-                            <option value="ခေမာသီရိ" class="text-gray-700">ခေမာသီရိ</option>
-                            <option value="ရမ်ပူ" class="text-gray-700">ရမ်ပူ</option>
-                            <option value="ရွှေညောင်ပင်" class="text-gray-700">ရွှေညောင်ပင်</option>
-                            <option value="လယ်ကုန်း" class="text-gray-700">လယ်ကုန်း</option>
-                            <option value="အေးစေတီ" class="text-gray-700">အေးစေတီ</option>
-                            <option value="ရှမ်းစုတောင်" class="text-gray-700">ရှမ်းစုတောင်</option>
-                            <option value="ရှမ်းစုမြောက်" class="text-gray-700">ရှမ်းစုမြောက်</option>
-                            <option value="အောင်နန်း" class="text-gray-700">အောင်နန်း</option>
-                            <option value="သီတာ" class="text-gray-700">သီတာ</option>
-                            <option value="ကချင်စု" class="text-gray-700">ကချင်စု</option>
-                            <option value="ကျွန်းပင်သာ" class="text-gray-700">ကျွန်းပင်သာ</option>
-                            <option value="ဧရာ" class="text-gray-700">ဧရာ</option>
-                            <option value="ရန်ကြီးအောင်" class="text-gray-700">ရန်ကြီးအောင်</option>
-                            <option value="တပ်ကုန်း" class="text-gray-700">တပ်ကုန်း</option>
-                            <option value="မြို့သစ်ကြီး" class="text-gray-700">မြို့သစ်ကြီး</option>
-                            <option value="add_new" class="text-indigo-600 font-semibold">+ Add Quarter</option>
+                        <select id="signupQuarter" onchange="checkQuarterSelection('signup')" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-gray-700">
+                            <!-- Dynamically loaded -->
                         </select>
                     </div>
+                </div>
+
+                <!-- City Dropdown -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <select id="signupCity" onchange="checkCitySelection('signup')" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-gray-700">
+                        <!-- Dynamically loaded -->
+                    </select>
                 </div>
 
                 <button type="submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition duration-200 text-sm">
@@ -246,7 +242,7 @@
 
                 <!-- Head of Household -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">အိမ်ထောင်ဦးစီး ဟုတ်ပါသလား။</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Is Head of Household? အိမ်ထောင်ဦးစီး ဟုတ်ပါသလား။</label>
                     <div class="flex items-center space-x-6 pt-1">
                         <label class="flex items-center space-x-2 cursor-pointer text-sm">
                             <input type="radio" name="googleIsHead" value="Yes" class="text-indigo-600 focus:ring-indigo-500">
@@ -259,46 +255,26 @@
                     </div>
                 </div>
 
-                <!-- Single Address Box -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                    <input type="text" id="googleAddress" placeholder="No.57,Min Yart Quarter,Myitkyina City,Kachin State,Myanmar" 
-                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">အိမ်နံပါတ်</label>
-                        <input type="text" id="googleHouse" placeholder="No.57" 
-                            class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">House Number</label>
+                        <input type="text" id="googleHouse" placeholder="NO. 57" 
+                            class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm uppercase-input">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Quarter</label>
-                        <select id="googleQuarter" onchange="checkQuarterSelection('google')" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-gray-500">
-                            <option value="" disabled selected hidden>Select Quarter</option>
-                            <option value="မင်းရပ်" class="text-gray-700">မင်းရပ်</option>
-                            <option value="မြို့မ" class="text-gray-700">မြို့မ</option>
-                            <option value="မြို့သစ်" class="text-gray-700">မြို့သစ်</option>
-                            <option value="ယုဇန" class="text-gray-700">ယုဇန</option>
-                            <option value="မြေမြင့်" class="text-gray-700">မြေမြင့်</option>
-                            <option value="ခေမာသီရိ" class="text-gray-700">ခေမာသီရိ</option>
-                            <option value="ရမ်ပူ" class="text-gray-700">ရမ်ပူ</option>
-                            <option value="ရွှေညောင်ပင်" class="text-gray-700">ရွှေညောင်ပင်</option>
-                            <option value="လယ်ကုန်း" class="text-gray-700">လယ်ကုန်း</option>
-                            <option value="အေးစေတီ" class="text-gray-700">အေးစေတီ</option>
-                            <option value="ရှမ်းစုတောင်" class="text-gray-700">ရှမ်းစုတောင်</option>
-                            <option value="ရှမ်းစုမြောက်" class="text-gray-700">ရှမ်းစုမြောက်</option>
-                            <option value="အောင်နန်း" class="text-gray-700">အောင်နန်း</option>
-                            <option value="သီတာ" class="text-gray-700">သီတာ</option>
-                            <option value="ကချင်စု" class="text-gray-700">ကချင်စု</option>
-                            <option value="ကျွန်းပင်သာ" class="text-gray-700">ကျွန်းပင်သာ</option>
-                            <option value="ဧရာ" class="text-gray-700">ဧရာ</option>
-                            <option value="ရန်ကြီးအောင်" class="text-gray-700">ရန်ကြီးအောင်</option>
-                            <option value="တပ်ကုန်း" class="text-gray-700">တပ်ကုန်း</option>
-                            <option value="မြို့သစ်ကြီး" class="text-gray-700">မြို့သစ်ကြီး</option>
-                            <option value="add_new" class="text-indigo-600 font-semibold">+ Add Quarter</option>
+                        <select id="googleQuarter" onchange="checkQuarterSelection('google')" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-gray-700">
+                            <!-- Dynamically loaded -->
                         </select>
                     </div>
+                </div>
+
+                <!-- City Dropdown -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <select id="googleCity" onchange="checkCitySelection('google')" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-gray-700">
+                        <!-- Dynamically loaded -->
+                    </select>
                 </div>
 
                 <button type="submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-md transition duration-200 text-sm">
@@ -327,22 +303,47 @@
     <div id="customQuarterModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all p-6 space-y-4">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-800">ရပ်ကွက်အသစ် ထည့်ရန်</h3>
+                <h3 class="text-lg font-semibold text-gray-800">Add New Quarter</h3>
                 <button onclick="closeQuarterModal()" class="text-gray-400 hover:text-gray-600">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <p class="text-xs text-gray-500">စာရင်းထဲတွင် မပါဝင်သေးသော ရပ်ကွက်အသစ်အမည်ကို ရိုက်ထည့်ပါ။</p>
+            <p class="text-xs text-gray-500">Enter the name of the new quarter.</p>
             <div>
-                <input type="text" id="modalQuarterInput" placeholder="ဥပမာ - ရပ်ကွက်အသစ်" 
-                    class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                <input type="text" id="modalQuarterInput" placeholder="e.g., NEW QUARTER" 
+                    class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm uppercase-input">
             </div>
             <div class="flex space-x-2 pt-2">
                 <button onclick="closeQuarterModal()" class="flex-1 py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition">
-                    မလုပ်တော့ပါ
+                    Cancel
                 </button>
                 <button onclick="saveNewQuarter()" class="flex-1 py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition">
-                    သိမ်းဆည်းမည်
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Adding City -->
+    <div id="customCityModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all p-6 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-gray-800">Add New City</h3>
+                <button onclick="closeCityModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500">Enter the name of the new city in English.</p>
+            <div>
+                <input type="text" id="modalCityInput" placeholder="e.g., MYITKYINA" 
+                    class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm uppercase-input">
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeCityModal()" class="flex-1 py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition">
+                    Cancel
+                </button>
+                <button onclick="saveNewCity()" class="flex-1 py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition">
+                    Save
                 </button>
             </div>
         </div>
@@ -365,6 +366,82 @@
         const db = firebase.firestore();
 
         let activeFormType = '';
+
+        const defaultQuarters = ["MIN YAT", "MYOMA", "MYOTHIT", "YUZANA"];
+        const defaultCities = ["MYITKYINA"];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDropdownData('Quarter');
+            loadDropdownData('City');
+        });
+
+        async function loadDropdownData(type) {
+            const collectionName = type === 'Quarter' ? 'quarters' : 'cities';
+            const defaults = type === 'Quarter' ? defaultQuarters : defaultCities;
+            
+            try {
+                const snapshot = await db.collection(collectionName).get();
+                let items = [];
+                
+                if (snapshot.empty) {
+                    for (let item of defaults) {
+                        await db.collection(collectionName).doc(item).set({ name: item });
+                        items.push(item);
+                    }
+                } else {
+                    snapshot.forEach(doc => {
+                        items.push(doc.id);
+                    });
+
+                    if (type === 'Quarter') {
+                        items = items.map(item => item.replace(/(\s+QUARTER)$/i, '').trim());
+                        items = items.filter(item => !item.match(/[\u1000-\u109F]/));
+                        items = [...new Set(items)];
+                        
+                        // MIN YAT ကို ဖယ်ထုတ်ပြီး ထိပ်ဆုံးမှာ အမြဲတမ်းထားမည်
+                        items = items.filter(item => item !== "MIN YAT");
+                        items.unshift("MIN YAT");
+
+                    } else if (type === 'City') {
+                        items = items.map(item => item.toUpperCase().trim());
+                        items = [...new Set(items)];
+
+                        // MYITKYINA ကို ဖယ်ထုတ်ပြီး ထိပ်ဆုံးမှာ အမြဲတမ်းထားမည်
+                        items = items.filter(item => item !== "MYITKYINA");
+                        items.unshift("MYITKYINA");
+
+                        // Firestore ထဲမှာ မရှိသေးရင် အလိုအလျောက် သွားထည့်ပေးမည်
+                        const myitkyinaCheck = await db.collection('cities').doc("MYITKYINA").get();
+                        if (!myitkyinaCheck.exists) {
+                            await db.collection('cities').doc("MYITKYINA").set({ name: "MYITKYINA" });
+                        }
+                    }
+                }
+
+                ['signup', 'google'].forEach(formType => {
+                    const selectElem = document.getElementById(formType + type);
+                    if (!selectElem) return;
+                    
+                    selectElem.innerHTML = '';
+                    items.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = item;
+                        opt.textContent = item;
+                        opt.className = "text-gray-700";
+                        selectElem.appendChild(opt);
+                    });
+
+                    const addOpt = document.createElement('option');
+                    addOpt.value = "add_new";
+                    addOpt.textContent = `+ Add ${type}`;
+                    addOpt.className = "text-indigo-600 font-semibold";
+                    selectElem.appendChild(addOpt);
+                });
+
+            } catch (error) {
+                console.error(`Error loading ${type}:`, error);
+            }
+        }
 
         function switchTab(tab) {
             const loginForm = document.getElementById('loginForm');
@@ -411,11 +488,6 @@
         function checkQuarterSelection(formType) {
             activeFormType = formType;
             const selectElem = document.getElementById(formType + 'Quarter');
-            
-            if (selectElem.value) {
-                selectElem.classList.remove('text-gray-500');
-                selectElem.classList.add('text-gray-700');
-            }
 
             if (selectElem.value === 'add_new') {
                 document.getElementById('modalQuarterInput').value = '';
@@ -427,41 +499,74 @@
         function closeQuarterModal() {
             document.getElementById('customQuarterModal').classList.add('hidden');
             if (activeFormType) {
-                document.getElementById(activeFormType + 'Quarter').value = "";
+                document.getElementById(activeFormType + 'Quarter').value = "MIN YAT";
             }
         }
 
-        function saveNewQuarter() {
-            const inputVal = document.getElementById('modalQuarterInput').value.trim();
+        async function saveNewQuarter() {
+            let inputVal = document.getElementById('modalQuarterInput').value.trim().toUpperCase();
             if (!inputVal) {
-                alert('ကျေးဇူးပြု၍ ရပ်ကွက်အမည် ထည့်ပါ။');
+                alert('Please enter a quarter name.');
                 return;
             }
 
-            const selectElem = document.getElementById(activeFormType + 'Quarter');
+            inputVal = inputVal.replace(/(\s+QUARTER)$/i, '').trim();
+
+            try {
+                await db.collection('quarters').doc(inputVal).set({ name: inputVal });
+                await loadDropdownData('Quarter');
+
+                ['signup', 'google'].forEach(fType => {
+                    const elem = document.getElementById(fType + 'Quarter');
+                    if (elem) elem.value = inputVal;
+                });
+
+                document.getElementById('customQuarterModal').classList.add('hidden');
+                showToast('New quarter saved successfully.', true);
+            } catch (error) {
+                showToast(error.message, false);
+            }
+        }
+
+        function checkCitySelection(formType) {
+            activeFormType = formType;
+            const selectElem = document.getElementById(formType + 'City');
             
-            let exists = false;
-            for (let i = 0; i < selectElem.options.length; i++) {
-                if (selectElem.options[i].value === inputVal) {
-                    exists = true;
-                    break;
-                }
+            if (selectElem.value === 'add_new') {
+                document.getElementById('modalCityInput').value = '';
+                document.getElementById('customCityModal').classList.remove('hidden');
+                document.getElementById('modalCityInput').focus();
+            }
+        }
+
+        function closeCityModal() {
+            document.getElementById('customCityModal').classList.add('hidden');
+            if (activeFormType) {
+                document.getElementById(activeFormType + 'City').value = "MYITKYINA";
+            }
+        }
+
+        async function saveNewCity() {
+            const inputVal = document.getElementById('modalCityInput').value.trim().toUpperCase();
+            if (!inputVal) {
+                alert('Please enter a city name.');
+                return;
             }
 
-            if (!exists) {
-                const opt = document.createElement('option');
-                opt.value = inputVal;
-                opt.textContent = inputVal;
-                opt.className = "text-gray-700";
-                
-                const addNewOption = selectElem.querySelector('option[value="add_new"]');
-                selectElem.insertBefore(opt, addNewOption);
-            }
+            try {
+                await db.collection('cities').doc(inputVal).set({ name: inputVal });
+                await loadDropdownData('City');
 
-            selectElem.value = inputVal;
-            selectElem.classList.remove('text-gray-500');
-            selectElem.classList.add('text-gray-700');
-            document.getElementById('customQuarterModal').classList.add('hidden');
+                ['signup', 'google'].forEach(fType => {
+                    const elem = document.getElementById(fType + 'City');
+                    if (elem) elem.value = inputVal;
+                });
+
+                document.getElementById('customCityModal').classList.add('hidden');
+                showToast('New city saved successfully.', true);
+            } catch (error) {
+                showToast(error.message, false);
+            }
         }
 
         function showToast(message, isSuccess = true) {
@@ -469,6 +574,11 @@
             toast.textContent = message;
             toast.className = `mb-4 p-3 rounded-lg text-sm text-center font-medium transition-all duration-300 ${isSuccess ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`;
             toast.classList.remove('hidden');
+
+            const scrollContainer = document.getElementById('scrollContainer');
+            if (scrollContainer) {
+                scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
         function hideToast() {
@@ -509,11 +619,11 @@
             const isHeadRadio = document.querySelector('input[name="signupIsHead"]:checked');
             const isHead = isHeadRadio ? isHeadRadio.value : '';
 
-            const address = document.getElementById('signupAddress').value.trim();
-            const house = document.getElementById('signupHouse').value.trim();
+            const house = document.getElementById('signupHouse').value.trim().toUpperCase();
             const quarter = document.getElementById('signupQuarter').value;
+            const city = document.getElementById('signupCity').value;
 
-            if (!firstName || !lastName || !email || !password || !rePassword || !phone || !nationality || !isHead || !address || !house || !quarter) {
+            if (!firstName || !lastName || !email || !password || !rePassword || !phone || !nationality || !isHead || !house || !quarter || !city) {
                 showToast('Please fill in all required fields.', false);
                 return;
             }
@@ -539,9 +649,9 @@
                         phone: phone,
                         nationality: nationality,
                         isHeadOfHousehold: isHead,
-                        address: address,
                         houseNumber: house,
                         quarter: quarter,
+                        city: city,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 })
@@ -583,11 +693,11 @@
             const isHeadRadio = document.querySelector('input[name="googleIsHead"]:checked');
             const isHead = isHeadRadio ? isHeadRadio.value : '';
 
-            const address = document.getElementById('googleAddress').value.trim();
-            const house = document.getElementById('googleHouse').value.trim();
+            const house = document.getElementById('googleHouse').value.trim().toUpperCase();
             const quarter = document.getElementById('googleQuarter').value;
+            const city = document.getElementById('googleCity').value;
 
-            if (!firstName || !phone || !nationality || !isHead || !address || !house || !quarter) {
+            if (!firstName || !phone || !nationality || !isHead || !house || !quarter || !city) {
                 showToast('Please fill in all required fields.', false);
                 return;
             }
@@ -601,9 +711,9 @@
                     phone: phone,
                     nationality: nationality,
                     isHeadOfHousehold: isHead,
-                    address: address,
                     houseNumber: house,
                     quarter: quarter,
+                    city: city,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 })
                 .then(() => {
