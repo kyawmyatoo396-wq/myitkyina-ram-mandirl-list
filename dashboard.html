@@ -32,18 +32,25 @@
             top: 0;
             z-index: 30;
         }
+        @keyframes pulse-gentle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.02); }
+        }
+        .birthday-wish-glow {
+            animation: pulse-gentle 2s infinite;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 lg:p-8">
 
-    <div class="w-full max-w-5xl space-y-6">
+    <div class="w-full max-w-6xl space-y-6">
         
         <!-- Sticky Top Bar (Profile & Hindu List Header combined container) -->
         <div class="sticky-header space-y-4 pt-2">
-            <!-- Top Profile & Logout Bar -->
-            <div class="w-full glass-card rounded-2xl shadow-xl p-4 sm:p-6 flex items-center justify-between border border-white/20">
-                <div class="flex items-center space-x-3">
-                    <div id="userAvatar" class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-md">
+            <!-- Top Profile, Birthday Wish & Logout Bar -->
+            <div class="w-full glass-card rounded-2xl shadow-xl p-4 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-white/20">
+                <div class="flex items-center space-x-3 w-full md:w-auto">
+                    <div id="userAvatar" class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-md flex-shrink-0">
                         U
                     </div>
                     <div>
@@ -51,7 +58,19 @@
                         <p id="userEmail" class="text-xs sm:text-sm text-gray-500">Loading...</p>
                     </div>
                 </div>
-                <button onclick="handleLogout()" class="flex items-center space-x-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-xl transition shadow-sm text-sm border border-red-200">
+
+                <!-- Birthday Wish Section (Between Profile Name & Logout) -->
+                <div id="birthdayWishContainer" class="hidden flex-1 max-w-md w-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 p-0.5 rounded-xl shadow-md birthday-wish-glow">
+                    <div class="bg-white px-4 py-2 rounded-[10px] flex items-center space-x-3">
+                        <span class="text-2xl animate-bounce">🎂</span>
+                        <div class="overflow-hidden">
+                            <p class="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600 uppercase tracking-wider">🎉 Today's Birthday 🎉</p>
+                            <p id="birthdayWishText" class="text-xs sm:text-sm font-semibold text-gray-800 truncate"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="handleLogout()" class="flex items-center space-x-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-xl transition shadow-sm text-sm border border-red-200 flex-shrink-0">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span>Log Out</span>
                 </button>
@@ -87,7 +106,7 @@
                 <table class="w-full text-left border-collapse" id="mainTable">
                     <tbody id="householdTableBody" class="divide-y divide-gray-200 text-sm text-gray-700">
                         <tr>
-                            <td colspan="5" class="text-center py-6 text-gray-400">Loading data...</td>
+                            <td colspan="6" class="text-center py-6 text-gray-400">Loading data...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -98,7 +117,7 @@
 
     <!-- House Members Modal -->
     <div id="membersModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all p-6 space-y-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all p-6 space-y-4">
             <div class="flex items-center justify-between border-b border-gray-200 pb-3">
                 <div>
                     <h3 id="modalHouseTitle" class="text-lg font-bold text-gray-800">House Members</h3>
@@ -115,6 +134,7 @@
                             <th class="py-2 px-3">စဉ်</th>
                             <th class="py-2 px-3">အမည်</th>
                             <th class="py-2 px-3">ဖုန်း</th>
+                            <th class="py-2 px-3">မွေးနေ့ (အသက်)</th>
                             <th class="py-2 px-3">အိမ်ထောင်ဦးစီး ဟုတ်/မဟုတ်</th>
                         </tr>
                     </thead>
@@ -175,7 +195,6 @@
                     try {
                         const docRef = await db.collection("users").doc(user.uid).get();
                         
-                        // အကယ်၍ Firestore ထဲမှာ ဒီ User ရဲ့ အချက်အလက် မရှိသေးရင် index.html သို့ ပြန်ပို့ပြီး Profile ဖြည့်ခိုင်းမည်
                         if (!docRef.exists) {
                             window.location.href = 'index.html';
                             return;
@@ -234,9 +253,63 @@
                 });
 
                 renderHouseholdTable(allUsersData);
+                checkAndShowBirthdays(allUsersData);
             } catch (error) {
                 console.error("Error loading users data:", error);
-                document.getElementById('householdTableBody').innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-500">Failed to load data.</td></tr>`;
+                document.getElementById('householdTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-6 text-red-500">Failed to load data.</td></tr>`;
+            }
+        }
+
+        // Helper function to calculate Age from DD-MM-YYYY
+        function calculateAgeFromDob(dobStr) {
+            if (!dobStr) return { age: '-', date: null };
+            const parts = dobStr.split('-');
+            if (parts.length !== 3) return { age: '-', date: null };
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            const year = parseInt(parts[2], 10);
+            if (isNaN(day) || isNaN(month) || isNaN(year)) return { age: '-', date: null };
+
+            const birthDate = new Date(year, month - 1, day);
+            const today = new Date();
+            let age = today.getFullYear() - year;
+            const m = today.getMonth() - (month - 1);
+            if (m < 0 || (m === 0 && today.getDate() < day)) {
+                age--;
+            }
+            return { age: age >= 0 ? age : '-', date: birthDate, day, month };
+        }
+
+        // Check today's birthdays and display wish banner
+        function checkAndShowBirthdays(usersList) {
+            const today = new Date();
+            const currentDay = String(today.getDate()).padStart(2, '0');
+            const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
+            const todayStr = `${currentDay}-${currentMonth}`;
+
+            const birthdayPersons = [];
+            usersList.forEach(user => {
+                if (user.dateOfBirth) {
+                    const dobParts = user.dateOfBirth.split('-');
+                    if (dobParts.length === 3) {
+                        const d = dobParts[0].padStart(2, '0');
+                        const m = dobParts[1].padStart(2, '0');
+                        if (`${d}-${m}` === todayStr) {
+                            const name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+                            if (name) birthdayPersons.push(name);
+                        }
+                    }
+                }
+            });
+
+            const wishContainer = document.getElementById('birthdayWishContainer');
+            const wishText = document.getElementById('birthdayWishText');
+
+            if (birthdayPersons.length > 0) {
+                wishText.textContent = `Happy Birthday to ${birthdayPersons.join(', ')}! Wishing you a wonderful day!`;
+                wishContainer.classList.remove('hidden');
+            } else {
+                wishContainer.classList.add('hidden');
             }
         }
 
@@ -247,7 +320,7 @@
             const householdHeads = usersList.filter(item => item.isHeadOfHousehold === 'Yes');
 
             if (householdHeads.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-gray-400">No household heads found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">No household heads found.</td></tr>`;
                 return;
             }
 
@@ -265,23 +338,24 @@
 
             // Loop through each quarter group
             Object.keys(groupedByQuarter).sort().forEach(quarterName => {
-                // 1. Quarter Header Row (အပေါ်ဆုံးတွင် ပေါ်မည်၊ ဖောင့်ကြီးပြီး Bold ဖြစ်မည်)
+                // 1. Quarter Header Row
                 const quarterTr = document.createElement('tr');
                 quarterTr.className = "bg-indigo-200/90 text-indigo-950 font-extrabold";
                 quarterTr.innerHTML = `
-                    <td colspan="5" class="py-4 px-4 text-lg tracking-wide uppercase">
+                    <td colspan="6" class="py-4 px-4 text-lg tracking-wide uppercase">
                         <i class="fa-solid fa-location-dot mr-2 text-indigo-700"></i> ${quarterName} QUARTER
                     </td>
                 `;
                 tbody.appendChild(quarterTr);
 
-                // 2. Table Column Headers Row (Quarter အောက်တွင် ဆက်ပေါ်မည်)
+                // 2. Table Column Headers Row
                 const tableHeaderTr = document.createElement('tr');
                 tableHeaderTr.className = "bg-indigo-50 text-indigo-700 text-xs uppercase font-semibold border-b border-gray-200";
                 tableHeaderTr.innerHTML = `
                     <th class="py-3 px-4">No.</th>
                     <th class="py-3 px-4">Name</th>
                     <th class="py-3 px-4">Phone</th>
+                    <th class="py-3 px-4">Date of Birth & Age</th>
                     <th class="py-3 px-4">Address</th>
                     <th class="py-3 px-4 text-center">House Member</th>
                 `;
@@ -291,6 +365,9 @@
                 groupedByQuarter[quarterName].forEach((item) => {
                     const fullName = `${item.firstName || ''} ${item.lastName || ''}`.trim();
                     
+                    const dobInfo = calculateAgeFromDob(item.dateOfBirth);
+                    const dobAgeDisplay = item.dateOfBirth ? `${item.dateOfBirth} (${dobInfo.age} yrs)` : '-';
+
                     let hNum = item.houseNumber ? `${item.houseNumber}` : '';
                     let qtrText = item.quarter ? `${item.quarter}, QUARTER` : '';
                     let cty = item.city ? item.city : 'MYITKYINA';
@@ -303,6 +380,7 @@
                         <td class="py-3 px-4 font-medium text-gray-500">${globalIndex++}</td>
                         <td class="py-3 px-4 font-semibold text-gray-800">${fullName}</td>
                         <td class="py-3 px-4">${item.phone || '-'}</td>
+                        <td class="py-3 px-4 text-gray-600 font-medium">${dobAgeDisplay}</td>
                         <td class="py-3 px-4 text-gray-600 font-medium">${fullAddress || '-'}</td>
                         <td class="py-3 px-4 text-center">
                             <button onclick="showHouseMembers('${item.houseNumber || ''}', '${item.quarter || ''}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition shadow-sm">
@@ -341,15 +419,19 @@
             );
 
             if (members.length === 0) {
-                modalBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-400">No members found.</td></tr>`;
+                modalBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No members found.</td></tr>`;
             } else {
                 members.forEach((member, idx) => {
                     const mName = `${member.firstName || ''} ${member.lastName || ''}`.trim();
+                    const dobInfo = calculateAgeFromDob(member.dateOfBirth);
+                    const dobAgeDisplay = member.dateOfBirth ? `${member.dateOfBirth} (${dobInfo.age} နှစျ)` : '-';
+
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="py-2 px-3 text-gray-500">${idx + 1}</td>
                         <td class="py-2 px-3 font-medium text-gray-800">${mName}</td>
                         <td class="py-2 px-3 text-gray-600">${member.phone || '-'}</td>
+                        <td class="py-2 px-3 text-gray-600">${dobAgeDisplay}</td>
                         <td class="py-2 px-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${member.isHeadOfHousehold === 'Yes' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">${member.isHeadOfHousehold || 'No'}</span></td>
                     `;
                     modalBody.appendChild(tr);
