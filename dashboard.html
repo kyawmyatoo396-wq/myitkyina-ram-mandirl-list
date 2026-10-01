@@ -134,7 +134,7 @@
                             <th class="py-2 px-3">No.</th>
                             <th class="py-2 px-3">Name</th>
                             <th class="py-2 px-3">Phone</th>
-                            <th class="py-2 px-3">Date of Birth</th>
+                            <th class="py-2 px-3">Age</th>
                             <th class="py-2 px-3">Head of Household</th>
                         </tr>
                     </thead>
@@ -355,7 +355,7 @@
                     <th class="py-3 px-4">No.</th>
                     <th class="py-3 px-4">Name</th>
                     <th class="py-3 px-4">Phone</th>
-                    <th class="py-3 px-4">Date of Birth & Age</th>
+                    <th class="py-3 px-4">Age</th>
                     <th class="py-3 px-4">Address</th>
                     <th class="py-3 px-4 text-center">House Member</th>
                 `;
@@ -366,7 +366,7 @@
                     const fullName = `${item.firstName || ''} ${item.lastName || ''}`.trim();
                     
                     const dobInfo = calculateAgeFromDob(item.dateOfBirth);
-                    const dobAgeDisplay = item.dateOfBirth ? `${item.dateOfBirth} (${dobInfo.age} yrs)` : '-';
+                    const ageDisplay = dobInfo.age !== '-' ? `${dobInfo.age} yrs` : '-';
 
                     let hNum = item.houseNumber ? `${item.houseNumber}` : '';
                     let qtrText = item.quarter ? `${item.quarter}, QUARTER` : '';
@@ -380,7 +380,7 @@
                         <td class="py-3 px-4 font-medium text-gray-500">${globalIndex++}</td>
                         <td class="py-3 px-4 font-semibold text-gray-800">${fullName}</td>
                         <td class="py-3 px-4">${item.phone || '-'}</td>
-                        <td class="py-3 px-4 text-gray-600 font-medium">${dobAgeDisplay}</td>
+                        <td class="py-3 px-4 text-gray-600 font-medium">${ageDisplay}</td>
                         <td class="py-3 px-4 text-gray-600 font-medium">${fullAddress || '-'}</td>
                         <td class="py-3 px-4 text-center">
                             <button onclick="showHouseMembers('${item.houseNumber || ''}', '${item.quarter || ''}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition shadow-sm">
@@ -424,14 +424,14 @@
                 members.forEach((member, idx) => {
                     const mName = `${member.firstName || ''} ${member.lastName || ''}`.trim();
                     const dobInfo = calculateAgeFromDob(member.dateOfBirth);
-                    const dobAgeDisplay = member.dateOfBirth ? `${member.dateOfBirth} (${dobInfo.age} နှစျ)` : '-';
+                    const ageDisplay = dobInfo.age !== '-' ? `${dobInfo.age} နှစျ` : '-';
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="py-2 px-3 text-gray-500">${idx + 1}</td>
                         <td class="py-2 px-3 font-medium text-gray-800">${mName}</td>
                         <td class="py-2 px-3 text-gray-600">${member.phone || '-'}</td>
-                        <td class="py-2 px-3 text-gray-600">${dobAgeDisplay}</td>
+                        <td class="py-2 px-3 text-gray-600">${ageDisplay}</td>
                         <td class="py-2 px-3"><span class="px-2 py-0.5 rounded text-xs font-semibold ${member.isHeadOfHousehold === 'Yes' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">${member.isHeadOfHousehold || 'No'}</span></td>
                     `;
                     modalBody.appendChild(tr);
