@@ -137,9 +137,31 @@
                     </div>
                 </div>
 
+                <!-- Gender Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <div class="flex items-center space-x-6 pt-1">
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="signupGender" value="Male" checked class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Male</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="signupGender" value="Female" class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Female</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Age Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                    <input type="number" id="signupAge" placeholder="25" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                    <input type="text" id="signupPhone" placeholder="09123456789" 
+                    <input type="text" id="signupPhone" placeholder="09780066406" 
                         class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                 </div>
 
@@ -176,7 +198,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">House Number</label>
-                        <input type="text" id="signupHouse" placeholder="NO. 57" 
+                        <input type="text" id="signupHouse" placeholder="NO.57" 
                             class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm uppercase-input">
                     </div>
                     <div>
@@ -219,9 +241,31 @@
                     </div>
                 </div>
 
+                <!-- Gender Selection -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <div class="flex items-center space-x-6 pt-1">
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="googleGender" value="Male" checked class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Male</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="googleGender" value="Female" class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Female</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Age Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                    <input type="number" id="googleAge" placeholder="25" 
+                        class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                    <input type="text" id="googlePhone" placeholder="09123456789" 
+                    <input type="text" id="googlePhone" placeholder="09780066406" 
                         class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                 </div>
 
@@ -258,7 +302,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">House Number</label>
-                        <input type="text" id="googleHouse" placeholder="NO. 57" 
+                        <input type="text" id="googleHouse" placeholder="NO.57" 
                             class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm uppercase-input">
                     </div>
                     <div>
@@ -611,6 +655,11 @@
             const email = document.getElementById('signupEmail').value.trim();
             const password = document.getElementById('signupPassword').value;
             const rePassword = document.getElementById('signupRePassword').value;
+            
+            const genderRadio = document.querySelector('input[name="signupGender"]:checked');
+            const gender = genderRadio ? genderRadio.value : '';
+            const age = document.getElementById('signupAge').value.trim();
+
             const phone = document.getElementById('signupPhone').value.trim();
             
             const nationalityRadio = document.querySelector('input[name="signupNationality"]:checked');
@@ -623,7 +672,7 @@
             const quarter = document.getElementById('signupQuarter').value;
             const city = document.getElementById('signupCity').value;
 
-            if (!firstName || !lastName || !email || !password || !rePassword || !phone || !nationality || !isHead || !house || !quarter || !city) {
+            if (!firstName || !lastName || !email || !password || !rePassword || !gender || !age || !phone || !nationality || !isHead || !house || !quarter || !city) {
                 showToast('Please fill in all required fields.', false);
                 return;
             }
@@ -646,6 +695,8 @@
                         firstName: firstName,
                         lastName: lastName,
                         email: email,
+                        gender: gender,
+                        age: Number(age),
                         phone: phone,
                         nationality: nationality,
                         isHeadOfHousehold: isHead,
@@ -698,6 +749,11 @@
             event.preventDefault();
             const firstName = document.getElementById('googleFirstName').value.trim();
             const lastName = document.getElementById('googleLastName').value.trim();
+            
+            const genderRadio = document.querySelector('input[name="googleGender"]:checked');
+            const gender = genderRadio ? genderRadio.value : '';
+            const age = document.getElementById('googleAge').value.trim();
+
             const phone = document.getElementById('googlePhone').value.trim();
             
             const nationalityRadio = document.querySelector('input[name="googleNationality"]:checked');
@@ -710,7 +766,7 @@
             const quarter = document.getElementById('googleQuarter').value;
             const city = document.getElementById('googleCity').value;
 
-            if (!firstName || !phone || !nationality || !isHead || !house || !quarter || !city) {
+            if (!firstName || !gender || !age || !phone || !nationality || !isHead || !house || !quarter || !city) {
                 showToast('Please fill in all required fields.', false);
                 return;
             }
@@ -721,6 +777,8 @@
                     firstName: firstName,
                     lastName: lastName,
                     email: user.email,
+                    gender: gender,
+                    age: Number(age),
                     phone: phone,
                     nationality: nationality,
                     isHeadOfHousehold: isHead,
