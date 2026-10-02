@@ -424,7 +424,7 @@
                 members.forEach((member, idx) => {
                     const mName = `${member.firstName || ''} ${member.lastName || ''}`.trim();
                     const dobInfo = calculateAgeFromDob(member.dateOfBirth);
-                    const ageDisplay = dobInfo.age !== '-' ? `${dobInfo.age} Y ` : '-';
+                    const ageDisplay = dobInfo.age !== '-' ? `${dobInfo.age} yrs ` : '-';
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
