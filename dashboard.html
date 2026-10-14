@@ -130,7 +130,7 @@
                 <table class="w-full text-left border-collapse" id="mainTable">
                     <tbody id="householdTableBody" class="divide-y divide-gray-200 text-sm text-gray-700">
                         <tr>
-                            <td colspan="7" class="text-center py-6 text-gray-400">Loading data...</td>
+                            <td colspan="8" class="text-center py-6 text-gray-400">Loading data...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -294,6 +294,7 @@
                     <thead>
                         <tr class="bg-gray-50 text-gray-600 text-xs uppercase border-b border-gray-200">
                             <th class="py-2 px-3">No.</th>
+                            <th class="py-2 px-3">Photo</th>
                             <th class="py-2 px-3">Name</th>
                             <th class="py-2 px-3">Phone</th>
                             <th class="py-2 px-3">Age</th>
@@ -343,6 +344,16 @@
         function cleanQuarterName(name) {
             if (!name) return '';
             return name.toString().replace(/(\s+QUARTER)+$/i, '').trim().toUpperCase();
+        }
+
+        // Helper function to render profile image / avatar html
+        function getAvatarHtml(imageUrl, nameStr, sizeClass = "w-9 h-9") {
+            if (imageUrl) {
+                return `<div class="${sizeClass} rounded-full overflow-hidden border border-indigo-200 shadow-sm flex-shrink-0"><img src="${imageUrl}" class="w-full h-full object-cover"></div>`;
+            } else {
+                const initial = (nameStr && nameStr.trim().length > 0) ? nameStr.trim().charAt(0).toUpperCase() : 'U';
+                return `<div class="${sizeClass} bg-indigo-600 text-white font-bold rounded-full flex items-center justify-center text-xs shadow-sm flex-shrink-0 border border-indigo-200">${initial}</div>`;
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -621,7 +632,7 @@
                 checkAndShowBirthdays(allUsersData);
             } catch (error) {
                 console.error("Error loading users data:", error);
-                document.getElementById('householdTableBody').innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-500">Failed to load data.</td></tr>`;
+                document.getElementById('householdTableBody').innerHTML = `<tr><td colspan="8" class="text-center py-6 text-red-500">Failed to load data.</td></tr>`;
             }
         }
 
@@ -725,7 +736,7 @@
             const householdHeads = usersList.filter(item => item.isHeadOfHousehold === 'Yes');
 
             if (householdHeads.length === 0) {
-                const colSpan = isAllSelected ? 7 : 6;
+                const colSpan = isAllSelected ? 8 : 7;
                 tbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center py-8 text-gray-400 font-medium">No household heads found for this selection.</td></tr>`;
                 return;
             }
@@ -742,8 +753,7 @@
             Object.keys(groupedByQuarter).sort().forEach(quarterName => {
                 const quarterTr = document.createElement('tr');
                 quarterTr.className = "bg-indigo-200/90 text-indigo-950 font-extrabold";
-                const colSpan = isAllSelected ? 7 : 6;
-                // Appended "QUARTER" to header text as requested
+                const colSpan = isAllSelected ? 8 : 7;
                 quarterTr.innerHTML = `
                     <td colspan="${colSpan}" class="py-3.5 px-4 text-base tracking-wide uppercase">
                         <i class="fa-solid fa-location-dot mr-2 text-indigo-700"></i> ${quarterName} QUARTER
@@ -757,6 +767,7 @@
                 if (isAllSelected) {
                     tableHeaderTr.innerHTML = `
                         <th class="py-3 px-4">NO.</th>
+                        <th class="py-3 px-4">PHOTO</th>
                         <th class="py-3 px-4">NAME</th>
                         <th class="py-3 px-4">PHONE</th>
                         <th class="py-3 px-4">AGE</th>
@@ -767,6 +778,7 @@
                 } else {
                     tableHeaderTr.innerHTML = `
                         <th class="py-3 px-4">NO.</th>
+                        <th class="py-3 px-4">PHOTO</th>
                         <th class="py-3 px-4">NAME</th>
                         <th class="py-3 px-4">PHONE</th>
                         <th class="py-3 px-4">AGE</th>
@@ -786,9 +798,9 @@
                     let hNum = item.houseNumber ? `${item.houseNumber}` : '';
                     let qtrClean = cleanQuarterName(item.quarter);
                     let cty = item.city ? item.city : 'MYITKYINA';
-                    // Added "QUARTER" suffix to address format as requested
                     let fullAddress = [hNum, qtrClean ? `${qtrClean} QUARTER` : '', cty].filter(Boolean).join(', ').toUpperCase();
                     let nationalityDisplay = item.nationality || 'Hindi';
+                    let avatarHtml = getAvatarHtml(item.profileImage, fullName, "w-9 h-9");
 
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50/50 transition border-b border-gray-100";
@@ -796,6 +808,7 @@
                     if (isAllSelected) {
                         tr.innerHTML = `
                             <td class="py-3.5 px-4 font-medium text-gray-500">${quarterIndex++}</td>
+                            <td class="py-3.5 px-4">${avatarHtml}</td>
                             <td class="py-3.5 px-4 font-semibold text-gray-800">${fullName}</td>
                             <td class="py-3.5 px-4 text-gray-600">${item.phone || '-'}</td>
                             <td class="py-3.5 px-4 text-gray-600 font-medium">${ageDisplay}</td>
@@ -810,6 +823,7 @@
                     } else {
                         tr.innerHTML = `
                             <td class="py-3.5 px-4 font-medium text-gray-500">${quarterIndex++}</td>
+                            <td class="py-3.5 px-4">${avatarHtml}</td>
                             <td class="py-3.5 px-4 font-semibold text-gray-800">${fullName}</td>
                             <td class="py-3.5 px-4 text-gray-600">${item.phone || '-'}</td>
                             <td class="py-3.5 px-4 text-gray-600 font-medium">${ageDisplay}</td>
@@ -841,16 +855,18 @@
             );
 
             if (members.length === 0) {
-                modalBody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">No members found.</td></tr>`;
+                modalBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-gray-400">No members found.</td></tr>`;
             } else {
                 members.forEach((member, idx) => {
                     const mName = `${member.firstName || ''} ${member.lastName || ''}`.trim();
                     const dobInfo = calculateAgeFromDob(member.dateOfBirth);
                     const ageDisplay = dobInfo.age !== '-' ? `${dobInfo.age} yrs ` : '-';
+                    let memberAvatarHtml = getAvatarHtml(member.profileImage, mName, "w-8 h-8");
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="py-2 px-3 text-gray-500">${idx + 1}</td>
+                        <td class="py-2 px-3">${memberAvatarHtml}</td>
                         <td class="py-2 px-3 font-medium text-gray-800">${mName}</td>
                         <td class="py-2 px-3 text-gray-600">${member.phone || '-'}</td>
                         <td class="py-2 px-3 text-gray-600">${ageDisplay}</td>
