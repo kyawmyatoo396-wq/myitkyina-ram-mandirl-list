@@ -45,13 +45,19 @@
 
     <div class="w-full max-w-6xl space-y-6">
         
-        <!-- Sticky Top Bar (Profile & Hindu List Header combined container) -->
+        <!-- Sticky Top Bar -->
         <div class="sticky-header space-y-4 pt-2">
-            <!-- Top Profile, Birthday Wish & Logout Bar -->
+            <!-- Top Profile, Birthday Notification & Logout Bar -->
             <div class="w-full glass-card rounded-2xl shadow-xl p-4 sm:p-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-white/20">
                 <div class="flex items-center space-x-3 w-full md:w-auto">
-                    <div id="userAvatar" class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-md flex-shrink-0">
-                        U
+                    <!-- Profile Avatar / Image Container -->
+                    <div id="userAvatarContainer" class="relative group cursor-pointer" onclick="viewProfileImage()">
+                        <div id="userAvatar" class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-md flex-shrink-0 overflow-hidden border-2 border-indigo-200">
+                            U
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-xs">
+                            <i class="fa-solid fa-eye"></i>
+                        </div>
                     </div>
                     <div>
                         <h3 id="userName" class="font-bold text-gray-800 text-base sm:text-lg">Loading...</h3>
@@ -59,29 +65,47 @@
                     </div>
                 </div>
 
-                <!-- Birthday Wish Section (Between Profile Name & Logout) -->
-                <div id="birthdayWishContainer" class="hidden flex-1 max-w-md w-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 p-0.5 rounded-xl shadow-md birthday-wish-glow">
-                    <div class="bg-white px-4 py-2 rounded-[10px] flex items-center space-x-3">
-                        <span class="text-2xl animate-bounce">🎂</span>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600 uppercase tracking-wider">🎉 Today's Birthday 🎉</p>
-                            <p id="birthdayWishText" class="text-xs sm:text-sm font-semibold text-gray-800 truncate"></p>
+                <!-- Birthday Notification Bell / Badge Section -->
+                <div id="birthdayNotifContainer" class="hidden flex items-center space-x-3 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 p-0.5 rounded-2xl shadow-md birthday-wish-glow">
+                    <button onclick="openBirthdayModal()" class="bg-white px-4 py-2.5 rounded-[14px] flex items-center space-x-2.5 hover:bg-pink-50 transition">
+                        <div class="relative">
+                            <i class="fa-solid fa-bell text-pink-600 text-lg animate-bounce"></i>
+                            <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>
                         </div>
-                    </div>
+                        <div class="text-left">
+                            <p class="text-[10px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600 uppercase tracking-wider">Birthday Alert</p>
+                            <p id="birthdayNotifText" class="text-xs font-bold text-gray-800 truncate max-w-[200px] sm:max-w-xs"></p>
+                        </div>
+                    </button>
                 </div>
 
-                <button onclick="handleLogout()" class="flex items-center space-x-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-xl transition shadow-sm text-sm border border-red-200 flex-shrink-0">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Log Out</span>
-                </button>
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <button onclick="openEditProfileModal()" class="flex items-center space-x-1.5 px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-medium rounded-xl transition shadow-sm text-sm border border-indigo-200">
+                        <i class="fa-solid fa-user-pen"></i>
+                        <span>Edit Profile</span>
+                    </button>
+                    <button onclick="handleLogout()" class="flex items-center space-x-1.5 px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-xl transition shadow-sm text-sm border border-red-200">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Log Out</span>
+                    </button>
+                </div>
             </div>
 
-            <!-- Hindu List Header & Quarter Filter (Sticky Section) -->
-            <div class="glass-card rounded-2xl shadow-xl p-4 sm:p-6 border border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <!-- Community List Header & Filter Section -->
+            <div class="glass-card rounded-2xl shadow-xl p-4 sm:p-6 border border-white/20 flex flex-col lg:flex-row items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-800">Hindu List</h2>
+                    <h2 class="text-xl font-bold text-gray-800">Community List</h2>
                     <p class="text-xs text-gray-500">View household heads and click 'House Member' to see family members.</p>
                 </div>
+
+                <!-- Community Filter Tabs (Defaulted to Hindi) -->
+                <div class="flex items-center bg-gray-100 p-1 rounded-xl space-x-1 border border-gray-200">
+                    <button onclick="filterByCommunity('ALL')" id="commBtnALL" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-600 hover:bg-white transition">All</button>
+                    <button onclick="filterByCommunity('Hindi')" id="commBtnHindi" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition">Hindi</button>
+                    <button onclick="filterByCommunity('Sikh')" id="commBtnSikh" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-600 hover:bg-white transition">Sikh</button>
+                    <button onclick="filterByCommunity('Nepali')" id="commBtnNepali" class="px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-600 hover:bg-white transition">Nepali</button>
+                </div>
+
                 <!-- Quarter Filter Dropdown -->
                 <div class="w-full sm:w-auto">
                     <select id="quarterFilter" onchange="filterDataByQuarter()" class="w-full sm:w-48 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-medium text-gray-700">
@@ -100,19 +124,157 @@
             <p class="text-gray-600 text-xs sm:text-sm">You are successfully logged in to the Myitkyina Ram Mandir List system.</p>
         </div>
 
-        <!-- Data Display Section (Table Container) -->
+        <!-- Data Display Section -->
         <div class="glass-card rounded-2xl shadow-2xl overflow-hidden border border-white/20 p-6 space-y-6">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse" id="mainTable">
                     <tbody id="householdTableBody" class="divide-y divide-gray-200 text-sm text-gray-700">
                         <tr>
-                            <td colspan="6" class="text-center py-6 text-gray-400">Loading data...</td>
+                            <td colspan="7" class="text-center py-6 text-gray-400">Loading data...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
+    </div>
+
+    <!-- Birthday Alert Popup Modal -->
+    <div id="birthdayModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden p-6 text-center space-y-4">
+            <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner animate-bounce">
+                🎂
+            </div>
+            <div>
+                <h3 class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600">Today's Birthday Celebration!</h3>
+                <p class="text-xs text-gray-500 mt-1">Warmest birthday wishes to our community members celebrating today:</p>
+            </div>
+            <div id="birthdayModalList" class="bg-pink-50/60 border border-pink-100 rounded-2xl p-4 text-sm font-bold text-gray-800 space-y-2 max-h-40 overflow-y-auto">
+                <!-- Loaded dynamically -->
+            </div>
+            <button onclick="closeBirthdayModal()" class="w-full py-2.5 bg-gradient-to-r from-pink-600 to-purple-600 text-white rounded-xl text-sm font-bold shadow-md hover:opacity-90 transition">
+                Awesome! Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Notification Toast / Popup -->
+    <div id="customToast" class="hidden fixed top-6 right-6 z-50 bg-white/95 backdrop-blur-md border border-indigo-100 shadow-2xl rounded-2xl p-4 flex items-center space-x-3 transform transition-all duration-300">
+        <div id="toastIcon" class="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center text-lg font-bold">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <div>
+            <h4 id="toastTitle" class="text-xs font-bold text-gray-800 uppercase tracking-wide">Success</h4>
+            <p id="toastMessage" class="text-xs text-gray-600 font-medium">Profile updated successfully!</p>
+        </div>
+    </div>
+
+    <!-- Profile Picture View Modal -->
+    <div id="viewImageModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4" onclick="closeViewImageModal()">
+        <div class="relative max-w-md w-full bg-white rounded-3xl overflow-hidden shadow-2xl p-4 text-center space-y-3" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between border-b pb-2">
+                <h3 class="font-bold text-gray-800 text-sm">Profile Picture</h3>
+                <button onclick="closeViewImageModal()" class="text-gray-400 hover:text-gray-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="modalImageContainer" class="flex justify-center items-center py-2">
+                <!-- Loaded Dynamically -->
+            </div>
+            <button onclick="closeViewImageModal()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-user-pen mr-2 text-indigo-600"></i> Edit Your Profile</h3>
+                <button onclick="closeEditProfileModal()" class="text-gray-400 hover:text-gray-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="editProfileForm" onsubmit="handleUpdateProfile(event)" class="space-y-4">
+                <!-- Profile Picture Upload -->
+                <div class="flex flex-col items-center justify-center space-y-2">
+                    <div id="modalAvatarPreview" class="w-20 h-20 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-2xl shadow-md overflow-hidden relative border-2 border-indigo-200">
+                        U
+                    </div>
+                    <label class="cursor-pointer text-xs font-semibold text-indigo-600 hover:underline">
+                        <i class="fa-solid fa-camera mr-1"></i> Change Profile Photo
+                        <input type="file" id="profileImageInput" accept="image/*" class="hidden" onchange="previewProfileImage(event)">
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">First Name</label>
+                        <input type="text" id="editFirstName" required class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Last Name</label>
+                        <input type="text" id="editLastName" required class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Phone Number</label>
+                        <input type="tel" id="editPhone" required class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Date of Birth (DD-MM-YYYY)</label>
+                        <input type="text" id="editDob" required class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Nationality</label>
+                        <select id="editNationality" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500">
+                            <option value="Hindi">Hindi</option>
+                            <option value="Sikh">Sikh</option>
+                            <option value="Nepali">Nepali</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Head of Household</label>
+                        <select id="editIsHeadOfHousehold" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">House Number</label>
+                        <input type="text" id="editHouse" required class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm uppercase focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Quarter</label>
+                        <select id="editQuarter" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500"></select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">City</label>
+                    <select id="editCity" class="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500"></select>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-3 border-t border-gray-200">
+                    <button type="button" onclick="closeEditProfileModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- House Members Modal -->
@@ -173,6 +335,15 @@
         const db = firebase.firestore();
 
         let allUsersData = [];
+        let currentCommunityFilter = 'Hindi'; // Set default community filter to 'Hindi'
+        let currentUserData = null;
+        let base64ProfileImage = '';
+        let todayBirthdayPersons = [];
+
+        function cleanQuarterName(name) {
+            if (!name) return '';
+            return name.toString().replace(/(\s+QUARTER)+$/i, '').trim().toUpperCase();
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             const welcomeBox = document.getElementById('welcomeBox');
@@ -200,19 +371,26 @@
                             return;
                         }
 
-                        const data = docRef.data();
-                        const fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim() || user.displayName || "User";
+                        currentUserData = docRef.data();
+                        const fullName = `${currentUserData.firstName || ''} ${currentUserData.lastName || ''}`.trim() || user.displayName || "User";
                         
                         document.getElementById('userName').textContent = fullName;
-                        document.getElementById('userEmail').textContent = data.email || user.email;
-                        document.getElementById('userAvatar').textContent = (fullName.charAt(0) || "U").toUpperCase();
+                        document.getElementById('userEmail').textContent = currentUserData.email || user.email;
+                        
+                        const avatarElem = document.getElementById('userAvatar');
+                        if (currentUserData.profileImage) {
+                            avatarElem.innerHTML = `<img src="${currentUserData.profileImage}" class="w-full h-full object-cover">`;
+                        } else {
+                            avatarElem.textContent = (fullName.charAt(0) || "U").toUpperCase();
+                        }
 
                         const welcomeTitle = document.getElementById('welcomeTitle');
                         if (welcomeTitle) {
-                            welcomeTitle.textContent = `Welcome Back, ${data.firstName || 'User'}!`;
+                            welcomeTitle.textContent = `Welcome Back, ${currentUserData.firstName || 'User'}!`;
                         }
 
                         await loadQuartersFilter();
+                        await loadEditDropdowns();
                         await loadAllUsersData();
 
                     } catch (error) {
@@ -224,6 +402,62 @@
             });
         });
 
+        function showCustomToast(message, isSuccess = true) {
+            const toast = document.getElementById('customToast');
+            const title = document.getElementById('toastTitle');
+            const msg = document.getElementById('toastMessage');
+            const icon = document.getElementById('toastIcon');
+
+            title.textContent = isSuccess ? 'Success' : 'Notice';
+            msg.textContent = message;
+
+            if (isSuccess) {
+                icon.className = "w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center text-lg font-bold";
+                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else {
+                icon.className = "w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-lg font-bold";
+                icon.innerHTML = '<i class="fa-solid fa-exclamation"></i>';
+            }
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function viewProfileImage() {
+            const modal = document.getElementById('viewImageModal');
+            const container = document.getElementById('modalImageContainer');
+            
+            if (currentUserData && currentUserData.profileImage) {
+                container.innerHTML = `<img src="${currentUserData.profileImage}" class="w-48 h-48 object-cover rounded-full shadow-lg border-4 border-indigo-100 mx-auto">`;
+            } else {
+                const fullName = `${currentUserData?.firstName || 'U'}`;
+                container.innerHTML = `<div class="w-32 h-32 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-4xl shadow-md mx-auto">${(fullName.charAt(0)).toUpperCase()}</div>`;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeViewImageModal() {
+            document.getElementById('viewImageModal').classList.add('hidden');
+        }
+
+        function openBirthdayModal() {
+            const listElem = document.getElementById('birthdayModalList');
+            listElem.innerHTML = '';
+            todayBirthdayPersons.forEach((name, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center space-x-2 py-1 px-2 bg-white rounded-xl shadow-sm";
+                div.innerHTML = `<i class="fa-solid fa-cake-candles text-pink-500"></i><span>${idx + 1}. ${name}</span>`;
+                listElem.appendChild(div);
+            });
+            document.getElementById('birthdayModal').classList.remove('hidden');
+        }
+
+        function closeBirthdayModal() {
+            document.getElementById('birthdayModal').classList.add('hidden');
+        }
+
         async function loadQuartersFilter() {
             try {
                 const snapshot = await db.collection('quarters').get();
@@ -231,8 +465,13 @@
                 
                 quarterFilter.innerHTML = '<option value="ALL">All Quarters</option>';
 
+                const uniqueQuarters = new Set();
                 snapshot.forEach(doc => {
-                    const qName = doc.id;
+                    const cleaned = cleanQuarterName(doc.id);
+                    if (cleaned) uniqueQuarters.add(cleaned);
+                });
+
+                Array.from(uniqueQuarters).sort().forEach(qName => {
                     const opt = document.createElement('option');
                     opt.value = qName;
                     opt.textContent = qName;
@@ -240,6 +479,132 @@
                 });
             } catch (error) {
                 console.error("Error loading quarters filter:", error);
+            }
+        }
+
+        async function loadEditDropdowns() {
+            try {
+                const qSnap = await db.collection('quarters').get();
+                const editQuarter = document.getElementById('editQuarter');
+                editQuarter.innerHTML = '';
+
+                const uniqueQuarters = new Set();
+                qSnap.forEach(doc => {
+                    const cleaned = cleanQuarterName(doc.id);
+                    if (cleaned) uniqueQuarters.add(cleaned);
+                });
+
+                Array.from(uniqueQuarters).sort().forEach(qName => {
+                    const opt = document.createElement('option');
+                    opt.value = qName;
+                    opt.textContent = qName;
+                    editQuarter.appendChild(opt);
+                });
+
+                const cSnap = await db.collection('cities').get();
+                const editCity = document.getElementById('editCity');
+                editCity.innerHTML = '';
+                cSnap.forEach(doc => {
+                    const opt = document.createElement('option');
+                    opt.value = doc.id;
+                    opt.textContent = doc.id;
+                    editCity.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Error loading edit dropdowns:", error);
+            }
+        }
+
+        function openEditProfileModal() {
+            if (!currentUserData) return;
+            document.getElementById('editFirstName').value = currentUserData.firstName || '';
+            document.getElementById('editLastName').value = currentUserData.lastName || '';
+            document.getElementById('editPhone').value = currentUserData.phone || '';
+            document.getElementById('editDob').value = currentUserData.dateOfBirth || '';
+            
+            const natVal = (currentUserData.nationality || 'Hindi').trim();
+            document.getElementById('editNationality').value = (natVal.toLowerCase() === 'hindu') ? 'Hindi' : natVal;
+            document.getElementById('editIsHeadOfHousehold').value = currentUserData.isHeadOfHousehold || 'No';
+
+            document.getElementById('editHouse').value = currentUserData.houseNumber || '';
+            document.getElementById('editQuarter').value = cleanQuarterName(currentUserData.quarter);
+            document.getElementById('editCity').value = currentUserData.city || '';
+
+            const preview = document.getElementById('modalAvatarPreview');
+            if (currentUserData.profileImage) {
+                preview.innerHTML = `<img src="${currentUserData.profileImage}" class="w-full h-full object-cover">`;
+                base64ProfileImage = currentUserData.profileImage;
+            } else {
+                preview.textContent = (currentUserData.firstName?.charAt(0) || "U").toUpperCase();
+                base64ProfileImage = '';
+            }
+
+            document.getElementById('editProfileModal').classList.remove('hidden');
+        }
+
+        function closeEditProfileModal() {
+            document.getElementById('editProfileModal').classList.add('hidden');
+        }
+
+        function previewProfileImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    base64ProfileImage = e.target.result;
+                    document.getElementById('modalAvatarPreview').innerHTML = `<img src="${base64ProfileImage}" class="w-full h-full object-cover">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function handleUpdateProfile(event) {
+            event.preventDefault();
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const firstName = document.getElementById('editFirstName').value.trim();
+            const lastName = document.getElementById('editLastName').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const dobStr = document.getElementById('editDob').value.trim();
+            const nationality = document.getElementById('editNationality').value;
+            const isHeadOfHousehold = document.getElementById('editIsHeadOfHousehold').value;
+            const house = document.getElementById('editHouse').value.trim().toUpperCase();
+            const quarter = cleanQuarterName(document.getElementById('editQuarter').value);
+            const city = document.getElementById('editCity').value;
+
+            const parts = dobStr.split('-');
+            let age = currentUserData.age || 0;
+            if (parts.length === 3) {
+                const year = parseInt(parts[2], 10);
+                const today = new Date();
+                age = today.getFullYear() - year;
+            }
+
+            const updatedData = {
+                firstName: firstName,
+                lastName: lastName,
+                phone: phone,
+                dateOfBirth: dobStr,
+                age: age,
+                nationality: nationality,
+                isHeadOfHousehold: isHeadOfHousehold,
+                houseNumber: house,
+                quarter: quarter,
+                city: city,
+                profileImage: base64ProfileImage || currentUserData.profileImage || ''
+            };
+
+            try {
+                await db.collection("users").doc(user.uid).update(updatedData);
+                closeEditProfileModal();
+                showCustomToast('Profile updated successfully!', true);
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                showCustomToast('Failed to update profile.', false);
             }
         }
 
@@ -252,15 +617,56 @@
                     allUsersData.push({ id: doc.id, ...doc.data() });
                 });
 
-                renderHouseholdTable(allUsersData);
+                applyFiltersAndRender();
                 checkAndShowBirthdays(allUsersData);
             } catch (error) {
                 console.error("Error loading users data:", error);
-                document.getElementById('householdTableBody').innerHTML = `<tr><td colspan="6" class="text-center py-6 text-red-500">Failed to load data.</td></tr>`;
+                document.getElementById('householdTableBody').innerHTML = `<tr><td colspan="7" class="text-center py-6 text-red-500">Failed to load data.</td></tr>`;
             }
         }
 
-        // Helper function to calculate Age from DD-MM-YYYY
+        function filterByCommunity(comm) {
+            currentCommunityFilter = comm;
+            
+            ['ALL', 'Hindi', 'Sikh', 'Nepali'].forEach(c => {
+                const btn = document.getElementById('commBtn' + c);
+                if (btn) {
+                    if (c === comm) {
+                        btn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition";
+                    } else {
+                        btn.className = "px-3 py-1.5 text-xs font-semibold rounded-lg text-gray-600 hover:bg-white transition";
+                    }
+                }
+            });
+
+            applyFiltersAndRender();
+        }
+
+        function applyFiltersAndRender() {
+            const selectedQuarter = cleanQuarterName(document.getElementById('quarterFilter').value);
+            let filtered = allUsersData;
+
+            if (currentCommunityFilter !== 'ALL') {
+                filtered = filtered.filter(item => {
+                    const nat = (item.nationality || 'Hindi').trim().toLowerCase();
+                    if (currentCommunityFilter.toLowerCase() === 'hindi') {
+                        return nat === 'hindi' || nat === 'hindu';
+                    }
+                    return nat === currentCommunityFilter.toLowerCase();
+                });
+            }
+
+            if (selectedQuarter !== 'ALL') {
+                filtered = filtered.filter(item => cleanQuarterName(item.quarter) === selectedQuarter);
+            }
+
+            renderHouseholdTable(filtered, currentCommunityFilter === 'ALL');
+        }
+
+        function filterDataByQuarter() {
+            applyFiltersAndRender();
+        }
+
         function calculateAgeFromDob(dobStr) {
             if (!dobStr) return { age: '-', date: null };
             const parts = dobStr.split('-');
@@ -280,14 +686,13 @@
             return { age: age >= 0 ? age : '-', date: birthDate, day, month };
         }
 
-        // Check today's birthdays and display wish banner
         function checkAndShowBirthdays(usersList) {
             const today = new Date();
             const currentDay = String(today.getDate()).padStart(2, '0');
             const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
             const todayStr = `${currentDay}-${currentMonth}`;
 
-            const birthdayPersons = [];
+            todayBirthdayPersons = [];
             usersList.forEach(user => {
                 if (user.dateOfBirth) {
                     const dobParts = user.dateOfBirth.split('-');
@@ -296,112 +701,129 @@
                         const m = dobParts[1].padStart(2, '0');
                         if (`${d}-${m}` === todayStr) {
                             const name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-                            if (name) birthdayPersons.push(name);
+                            if (name) todayBirthdayPersons.push(name);
                         }
                     }
                 }
             });
 
-            const wishContainer = document.getElementById('birthdayWishContainer');
-            const wishText = document.getElementById('birthdayWishText');
+            const notifContainer = document.getElementById('birthdayNotifContainer');
+            const notifText = document.getElementById('birthdayNotifText');
 
-            if (birthdayPersons.length > 0) {
-                wishText.textContent = `Happy Birthday to ${birthdayPersons.join(', ')}! Wishing you a wonderful day!`;
-                wishContainer.classList.remove('hidden');
+            if (todayBirthdayPersons.length > 0) {
+                notifText.textContent = `${todayBirthdayPersons.join(', ')} (Birthday Today!)`;
+                notifContainer.classList.remove('hidden');
             } else {
-                wishContainer.classList.add('hidden');
+                notifContainer.classList.add('hidden');
             }
         }
 
-        function renderHouseholdTable(usersList) {
+        function renderHouseholdTable(usersList, isAllSelected) {
             const tbody = document.getElementById('householdTableBody');
             tbody.innerHTML = '';
 
             const householdHeads = usersList.filter(item => item.isHeadOfHousehold === 'Yes');
 
             if (householdHeads.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">No household heads found.</td></tr>`;
+                const colSpan = isAllSelected ? 7 : 6;
+                tbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center py-8 text-gray-400 font-medium">No household heads found for this selection.</td></tr>`;
                 return;
             }
 
-            // Group by Quarter
             const groupedByQuarter = {};
             householdHeads.forEach(item => {
-                const qtr = (item.quarter || 'OTHER').trim().toUpperCase();
+                const qtr = cleanQuarterName(item.quarter) || 'OTHER';
                 if (!groupedByQuarter[qtr]) {
                     groupedByQuarter[qtr] = [];
                 }
                 groupedByQuarter[qtr].push(item);
             });
 
-            let globalIndex = 1;
-
-            // Loop through each quarter group
             Object.keys(groupedByQuarter).sort().forEach(quarterName => {
-                // 1. Quarter Header Row
                 const quarterTr = document.createElement('tr');
                 quarterTr.className = "bg-indigo-200/90 text-indigo-950 font-extrabold";
+                const colSpan = isAllSelected ? 7 : 6;
+                // Appended "QUARTER" to header text as requested
                 quarterTr.innerHTML = `
-                    <td colspan="6" class="py-4 px-4 text-lg tracking-wide uppercase">
+                    <td colspan="${colSpan}" class="py-3.5 px-4 text-base tracking-wide uppercase">
                         <i class="fa-solid fa-location-dot mr-2 text-indigo-700"></i> ${quarterName} QUARTER
                     </td>
                 `;
                 tbody.appendChild(quarterTr);
 
-                // 2. Table Column Headers Row
                 const tableHeaderTr = document.createElement('tr');
-                tableHeaderTr.className = "bg-indigo-50 text-indigo-700 text-xs uppercase font-semibold border-b border-gray-200";
-                tableHeaderTr.innerHTML = `
-                    <th class="py-3 px-4">No.</th>
-                    <th class="py-3 px-4">Name</th>
-                    <th class="py-3 px-4">Phone</th>
-                    <th class="py-3 px-4">Age</th>
-                    <th class="py-3 px-4">Address</th>
-                    <th class="py-3 px-4 text-center">House Member</th>
-                `;
+                tableHeaderTr.className = "bg-indigo-50/70 text-indigo-700 text-xs uppercase font-semibold border-b border-gray-200";
+                
+                if (isAllSelected) {
+                    tableHeaderTr.innerHTML = `
+                        <th class="py-3 px-4">NO.</th>
+                        <th class="py-3 px-4">NAME</th>
+                        <th class="py-3 px-4">PHONE</th>
+                        <th class="py-3 px-4">AGE</th>
+                        <th class="py-3 px-4">ADDRESS</th>
+                        <th class="py-3 px-4">NATIONALITY</th>
+                        <th class="py-3 px-4 text-center">HOUSE MEMBER</th>
+                    `;
+                } else {
+                    tableHeaderTr.innerHTML = `
+                        <th class="py-3 px-4">NO.</th>
+                        <th class="py-3 px-4">NAME</th>
+                        <th class="py-3 px-4">PHONE</th>
+                        <th class="py-3 px-4">AGE</th>
+                        <th class="py-3 px-4">ADDRESS</th>
+                        <th class="py-3 px-4 text-center">HOUSE MEMBER</th>
+                    `;
+                }
                 tbody.appendChild(tableHeaderTr);
 
-                // 3. Members under this quarter
+                let quarterIndex = 1;
+
                 groupedByQuarter[quarterName].forEach((item) => {
                     const fullName = `${item.firstName || ''} ${item.lastName || ''}`.trim();
-                    
                     const dobInfo = calculateAgeFromDob(item.dateOfBirth);
                     const ageDisplay = dobInfo.age !== '-' ? `${dobInfo.age} yrs` : '-';
 
                     let hNum = item.houseNumber ? `${item.houseNumber}` : '';
-                    let qtrText = item.quarter ? `${item.quarter}, QUARTER` : '';
+                    let qtrClean = cleanQuarterName(item.quarter);
                     let cty = item.city ? item.city : 'MYITKYINA';
-                    
-                    let fullAddress = [hNum, qtrText, cty].filter(Boolean).join(', ').toUpperCase();
+                    // Added "QUARTER" suffix to address format as requested
+                    let fullAddress = [hNum, qtrClean ? `${qtrClean} QUARTER` : '', cty].filter(Boolean).join(', ').toUpperCase();
+                    let nationalityDisplay = item.nationality || 'Hindi';
 
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50/50 transition border-b border-gray-100";
-                    tr.innerHTML = `
-                        <td class="py-3 px-4 font-medium text-gray-500">${globalIndex++}</td>
-                        <td class="py-3 px-4 font-semibold text-gray-800">${fullName}</td>
-                        <td class="py-3 px-4">${item.phone || '-'}</td>
-                        <td class="py-3 px-4 text-gray-600 font-medium">${ageDisplay}</td>
-                        <td class="py-3 px-4 text-gray-600 font-medium">${fullAddress || '-'}</td>
-                        <td class="py-3 px-4 text-center">
-                            <button onclick="showHouseMembers('${item.houseNumber || ''}', '${item.quarter || ''}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition shadow-sm">
-                                <i class="fa-solid fa-users mr-1"></i> View Members
-                            </button>
-                        </td>
-                    `;
+
+                    if (isAllSelected) {
+                        tr.innerHTML = `
+                            <td class="py-3.5 px-4 font-medium text-gray-500">${quarterIndex++}</td>
+                            <td class="py-3.5 px-4 font-semibold text-gray-800">${fullName}</td>
+                            <td class="py-3.5 px-4 text-gray-600">${item.phone || '-'}</td>
+                            <td class="py-3.5 px-4 text-gray-600 font-medium">${ageDisplay}</td>
+                            <td class="py-3.5 px-4 text-gray-600 font-medium">${fullAddress || '-'}</td>
+                            <td class="py-3.5 px-4 text-gray-600 font-medium"><span class="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md text-xs font-semibold">${nationalityDisplay}</span></td>
+                            <td class="py-3.5 px-4 text-center">
+                                <button onclick="showHouseMembers('${item.houseNumber || ''}', '${item.quarter || ''}')" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition shadow-sm">
+                                    <i class="fa-solid fa-users mr-1"></i> View Members
+                                </button>
+                            </td>
+                        `;
+                    } else {
+                        tr.innerHTML = `
+                            <td class="py-3.5 px-4 font-medium text-gray-500">${quarterIndex++}</td>
+                            <td class="py-3.5 px-4 font-semibold text-gray-800">${fullName}</td>
+                            <td class="py-3.5 px-4 text-gray-600">${item.phone || '-'}</td>
+                            <td class="py-3.5 px-4 text-gray-600 font-medium">${ageDisplay}</td>
+                            <td class="py-3.5 px-4 text-gray-600 font-medium">${fullAddress || '-'}</td>
+                            <td class="py-3.5 px-4 text-center">
+                                <button onclick="showHouseMembers('${item.houseNumber || ''}', '${item.quarter || ''}')" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium transition shadow-sm">
+                                    <i class="fa-solid fa-users mr-1"></i> View Members
+                                </button>
+                            </td>
+                        `;
+                    }
                     tbody.appendChild(tr);
                 });
             });
-        }
-
-        function filterDataByQuarter() {
-            const selectedQuarter = document.getElementById('quarterFilter').value;
-            
-            if (selectedQuarter === 'ALL') {
-                renderHouseholdTable(allUsersData);
-            } else {
-                const filtered = allUsersData.filter(item => (item.quarter || '').trim().toUpperCase() === selectedQuarter.trim().toUpperCase());
-                renderHouseholdTable(filtered);
-            }
         }
 
         function showHouseMembers(houseNumber, quarter) {
@@ -410,12 +832,12 @@
             const modalBody = document.getElementById('modalMembersBody');
 
             modalTitle.textContent = `House No: ${houseNumber || '-'}`;
-            modalSub.textContent = `Quarter: ${quarter || '-'}`;
+            modalSub.textContent = `Quarter: ${cleanQuarterName(quarter) || '-'} QUARTER`;
             modalBody.innerHTML = '';
 
             const members = allUsersData.filter(item => 
                 (item.houseNumber || '').trim().toUpperCase() === (houseNumber || '').trim().toUpperCase() && 
-                (item.quarter || '').trim().toUpperCase() === (quarter || '').trim().toUpperCase()
+                cleanQuarterName(item.quarter) === cleanQuarterName(quarter)
             );
 
             if (members.length === 0) {
