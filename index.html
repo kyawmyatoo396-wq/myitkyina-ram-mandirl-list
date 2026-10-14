@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts - Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts - Inter & Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
     
     <!-- Firebase App (Core) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -23,6 +23,9 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
+        .title-font {
+            font-family: 'Montserrat', sans-serif;
+        }
         .glass-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -32,22 +35,32 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
+<body class="min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 lg:p-8">
 
-    <div class="w-full max-w-md glass-card rounded-2xl shadow-2xl overflow-hidden border border-white/20 transition-all duration-300">
+    <!-- Header / Title -->
+    <div class="text-center mb-6 px-2 space-y-1 sm:space-y-1.5 max-w-xl">
+        <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-amber-300 text-xs sm:text-sm font-semibold tracking-wider uppercase border border-white/20 shadow-sm">
+            WELCOME TO
+        </span>
+        <h2 class="title-font text-xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-amber-400 drop-shadow-md">
+            OUR COMMUNITY FAMILY DIRECTORY
+        </h2>
+    </div>
+
+    <div class="w-full max-w-md sm:max-w-lg lg:max-w-xl glass-card rounded-2xl shadow-2xl overflow-hidden border border-white/20 transition-all duration-300">
         
         <!-- Header Tabs -->
         <div id="authTabs" class="flex border-b border-gray-200">
-            <button id="loginTabBtn" onclick="switchTab('login')" class="flex-1 py-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-colors duration-200">
+            <button id="loginTabBtn" onclick="switchTab('login')" class="flex-1 py-4 text-center font-semibold text-indigo-600 border-b-2 border-indigo-600 transition-colors duration-200 text-sm sm:text-base">
                 Login
             </button>
-            <button id="signupTabBtn" onclick="switchTab('signup')" class="flex-1 py-4 text-center font-semibold text-gray-400 hover:text-gray-600 border-b-2 border-transparent transition-colors duration-200">
+            <button id="signupTabBtn" onclick="switchTab('signup')" class="flex-1 py-4 text-center font-semibold text-gray-400 hover:text-gray-600 border-b-2 border-transparent transition-colors duration-200 text-sm sm:text-base">
                 Sign Up
             </button>
         </div>
 
         <!-- Scrollable Form Container with ID -->
-        <div id="scrollContainer" class="p-6 sm:p-8 max-h-[80vh] overflow-y-auto">
+        <div id="scrollContainer" class="p-4 sm:p-6 lg:p-8 max-h-[80vh] overflow-y-auto">
             
             <!-- Toast Notification Container -->
             <div id="toast" class="hidden mb-4 p-3 rounded-lg text-sm text-center font-medium transition-all duration-300"></div>
@@ -94,7 +107,7 @@
 
             <!-- Signup Form -->
             <form id="signupForm" onsubmit="handleSignup(event)" novalidate class="space-y-4 hidden">
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                         <input type="text" id="signupFirstName" placeholder="Rahul" 
@@ -165,13 +178,17 @@
                         class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                 </div>
 
-                <!-- Nationality Checkboxes -->
+                <!-- Nationality Radio Buttons (Hindu, Sikh, Nepali) -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
-                    <div class="flex items-center space-x-6 pt-1">
+                    <div class="flex items-center justify-between sm:justify-start sm:space-x-6 pt-1">
                         <label class="flex items-center space-x-2 cursor-pointer text-sm">
-                            <input type="radio" name="signupNationality" value="Hindi" checked class="text-indigo-600 focus:ring-indigo-500">
-                            <span>Hindi</span>
+                            <input type="radio" name="signupNationality" value="Hindu" checked class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Hindu</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="signupNationality" value="Sikh" class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Sikh</span>
                         </label>
                         <label class="flex items-center space-x-2 cursor-pointer text-sm">
                             <input type="radio" name="signupNationality" value="Nepali" class="text-indigo-600 focus:ring-indigo-500">
@@ -195,7 +212,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">House Number</label>
                         <input type="text" id="signupHouse" placeholder="NO.57" 
@@ -228,7 +245,7 @@
                     <i class="fa-solid fa-circle-info mr-1"></i> Please complete your profile information to proceed.
                 </div>
                 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                         <input type="text" id="googleFirstName" placeholder="Rahul" 
@@ -269,13 +286,17 @@
                         class="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                 </div>
 
-                <!-- Nationality Checkboxes -->
+                <!-- Nationality Radio Buttons (Hindu, Sikh, Nepali) -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
-                    <div class="flex items-center space-x-6 pt-1">
+                    <div class="flex items-center justify-between sm:justify-start sm:space-x-6 pt-1">
                         <label class="flex items-center space-x-2 cursor-pointer text-sm">
-                            <input type="radio" name="googleNationality" value="Hindi" checked class="text-indigo-600 focus:ring-indigo-500">
-                            <span>Hindi</span>
+                            <input type="radio" name="googleNationality" value="Hindu" checked class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Hindu</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                            <input type="radio" name="googleNationality" value="Sikh" class="text-indigo-600 focus:ring-indigo-500">
+                            <span>Sikh</span>
                         </label>
                         <label class="flex items-center space-x-2 cursor-pointer text-sm">
                             <input type="radio" name="googleNationality" value="Nepali" class="text-indigo-600 focus:ring-indigo-500">
@@ -299,7 +320,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">House Number</label>
                         <input type="text" id="googleHouse" placeholder="NO.57" 
